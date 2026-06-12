@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15-Min Intraday Trading System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base: #080c10;
+  --bg-surface: #0d1117;
+  --bg-card: #111820;
+  --bg-card-hover: #161f28;
+  --bg-elevated: #1a2332;
+  --border: rgba(255,255,255,0.06);
+  --border-accent: rgba(255,255,255,0.12);
+  --text-primary: #e8edf2;
+  --text-secondary: #8899aa;
+  --text-muted: #4a5568;
+  --gold: #f0b429;
+  --gold-dim: rgba(240,180,41,0.15);
+  --gold-border: rgba(240,180,41,0.3);
+  --green: #3ecf8e;
+  --green-dim: rgba(62,207,142,0.12);
+  --green-border: rgba(62,207,142,0.3);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.12);
+  --red-border: rgba(248,113,113,0.3);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.12);
+  --blue-border: rgba(96,165,250,0.3);
+  --amber: #fb923c;
+  --amber-dim: rgba(251,146,60,0.12);
+  --teal: #2dd4bf;
+  --teal-dim: rgba(45,212,191,0.1);
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(240,180,41,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240,180,41,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-wrap { position: relative; z-index: 1; }
+
+/* NAV */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(8,12,16,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 52px;
+}
+
+.nav-brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-right: 32px;
+  white-space: nowrap;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+
+.nav-link {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+.nav-link.active { color: var(--gold); background: var(--gold-dim); }
+
+/* HERO */
+.hero {
+  padding: 64px 32px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-eyebrow::after {
+  content: '';
+  flex: 1;
+  max-width: 60px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.4;
+}
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.hero h1 span { color: var(--gold); }
+
+.hero-sub {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+.stock-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 40px;
+}
+
+.stock-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--gold-border);
+  color: var(--gold);
+  background: var(--gold-dim);
+  letter-spacing: 0.05em;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.stat-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  transition: border-color 0.2s;
+}
+.stat-box:hover { border-color: var(--border-accent); }
+
+.stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.stat-val.g { color: var(--green); }
+.stat-val.b { color: var(--blue); }
+.stat-val.a { color: var(--gold); }
+.stat-val.w { color: var(--text-primary); }
+
+.stat-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* MAIN LAYOUT */
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px 80px;
+}
+
+/* SECTION */
+.section {
+  margin-bottom: 56px;
+  scroll-margin-top: 70px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  padding: 3px 9px;
+  border-radius: 4px;
+  letter-spacing: 0.08em;
+}
+
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.section-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-left: auto;
+  max-width: 300px;
+  text-align: right;
+  line-height: 1.5;
+}
+
+/* CARDS */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.card:hover { border-color: var(--border-accent); background: var(--bg-card-hover); }
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-gold { background: var(--gold); }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-blue { background: var(--blue); }
+.dot-amber { background: var(--amber); }
+.dot-teal { background: var(--teal); }
+
+.card-body {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+.card-body strong { color: var(--text-primary); font-weight: 500; }
+
+/* TWO COL */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* PILL TAGS */
+.pill {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+.pill-green { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+.pill-red { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-border); }
+.pill-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid var(--gold-border); }
+.pill-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue-border); }
+.pill-amber { background: var(--amber-dim); color: var(--amber); }
+
+/* CHECKLIST */
+.checklist { list-style: none; }
+.checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.checklist li:last-child { border-bottom: none; }
+.checklist li strong { color: var(--text-primary); font-weight: 500; }
+
+.check-box {
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  border: 1px solid var(--border-accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  transition: all 0.15s;
+  user-select: none;
+}
+.check-box:hover { border-color: var(--green); }
+.check-box.checked { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+
+.time-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  background: var(--gold-dim);
+  padding: 1px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* CONDITION BLOCKS */
+.condition-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.condition-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.condition-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  border-radius: 3px 0 0 3px;
+}
+.condition-card.ema::before { background: var(--blue); }
+.condition-card.pivot::before { background: var(--gold); }
+.condition-card.adx::before { background: var(--teal); }
+.condition-card.vol::before { background: var(--amber); }
+.condition-card:hover { border-color: var(--border-accent); }
+
+.condition-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+
+.condition-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.condition-card.ema .condition-name { color: var(--blue); }
+.condition-card.pivot .condition-name { color: var(--gold); }
+.condition-card.adx .condition-name { color: var(--teal); }
+.condition-card.vol .condition-name { color: var(--amber); }
+
+.condition-rule {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 10px;
+}
+.condition-rule strong { color: var(--text-primary); font-weight: 500; }
+
+.condition-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-block;
+}
+.condition-card.ema .condition-value { background: var(--blue-dim); color: var(--blue); }
+.condition-card.pivot .condition-value { background: var(--gold-dim); color: var(--gold); }
+.condition-card.adx .condition-value { background: var(--teal-dim); color: var(--teal); }
+.condition-card.vol .condition-value { background: var(--amber-dim); color: var(--amber); }
+
+/* PIVOT FORMULA */
+.formula-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+.formula-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.formula-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.formula-eq {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+  line-height: 1.5;
+}
+
+/* ENTRY EXIT TABLE */
+.rule-table { width: 100%; border-collapse: collapse; }
+.rule-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.rule-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+  vertical-align: top;
+  line-height: 1.6;
+}
+.rule-table tr:last-child td { border-bottom: none; }
+.rule-table td:first-child { color: var(--text-primary); font-weight: 500; min-width: 130px; }
+.rule-table td strong { color: var(--text-primary); font-weight: 500; }
+
+/* STOCK CARDS */
+.stock-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+
+.stock-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: default;
+}
+.stock-card:hover {
+  border-color: var(--gold-border);
+  background: var(--bg-elevated);
+  transform: translateY(-2px);
+}
+
+.stock-ticker {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.stock-name {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.stock-trait {
+  font-size: 10px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* PIVOT CALC */
+.pivot-calc {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+}
+
+.pivot-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.input-group input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: 7px;
+  padding: 9px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input-group input:focus { border-color: var(--gold); }
+
+.calc-btn {
+  width: 100%;
+  background: var(--gold);
+  color: #080c10;
+  border: none;
+  border-radius: 8px;
+  padding: 11px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-bottom: 16px;
+}
+.calc-btn:hover { opacity: 0.9; }
+.calc-btn:active { transform: scale(0.99); }
+
+.pivot-results {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.pivot-result-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+}
+.pivot-result-box.pivot-p { border-color: var(--gold-border); background: var(--gold-dim); }
+.pivot-result-box.pivot-r { border-color: var(--green-border); }
+.pivot-result-box.pivot-s { border-color: var(--red-border); }
+
+.pivot-result-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.pivot-p .pivot-result-label { color: var(--gold); }
+.pivot-r .pivot-result-label { color: var(--green); }
+.pivot-s .pivot-result-label { color: var(--red); }
+
+.pivot-result-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* JOURNAL */
+.journal-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.journal-header {
+  display: grid;
+  grid-template-columns: 90px 90px 90px 80px 80px 80px 80px 1fr;
+  gap: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.journal-th {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.journal-row {
+  display: grid;
+  grid-template-columns: 90px 90px 90px 80px 80px 80px 80px 1fr;
+  gap: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+.journal-row:last-child { border-bottom: none; }
+.journal-row:hover { background: var(--bg-elevated); }
+
+.journal-td {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding-right: 8px;
+}
+
+.journal-td.ticker { color: var(--gold); font-weight: 500; }
+.journal-td.win { color: var(--green); }
+.journal-td.loss { color: var(--red); }
+.journal-td.neutral { color: var(--text-secondary); }
+
+/* RULES */
+.rule-strip {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: border-color 0.2s;
+}
+.rule-strip:hover { border-color: var(--border-accent); }
+
+.rule-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  min-width: 24px;
+  margin-top: 2px;
+}
+
+.rule-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+.rule-text strong { color: var(--text-primary); font-weight: 500; }
+
+.rule-strip.do { border-left: 2px solid var(--green); }
+.rule-strip.dont { border-left: 2px solid var(--red); }
+.rule-strip.note { border-left: 2px solid var(--gold); }
+
+/* TRADE EXAMPLE */
+.example-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  position: relative;
+}
+
+.example-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.example-steps { counter-reset: step; }
+
+.example-step {
+  counter-increment: step;
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.example-step:last-child { border-bottom: none; }
+
+.example-step::before {
+  content: counter(step);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  color: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.example-step strong { color: var(--text-primary); font-weight: 500; }
+
+/* WARNING BOX */
+.warn-box {
+  background: var(--amber-dim);
+  border: 1px solid rgba(251,146,60,0.25);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #f0c080;
+  line-height: 1.65;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.warn-icon { font-size: 15px; margin-top: 1px; flex-shrink: 0; }
+
+.info-box {
+  background: var(--blue-dim);
+  border: 1px solid var(--blue-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #93c5fd;
+  line-height: 1.65;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* RISK CALC */
+.risk-calc {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+}
+.risk-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.risk-result-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.risk-result-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.risk-result-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-muted); letter-spacing: 0.08em; margin-bottom: 5px; text-transform: uppercase; }
+.risk-result-val { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; color: var(--text-primary); }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 32px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section {
+  animation: fadeUp 0.5s ease both;
+}
+
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.1s; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+.section:nth-child(4) { animation-delay: 0.2s; }
+.section:nth-child(5) { animation-delay: 0.25s; }
+.section:nth-child(6) { animation-delay: 0.3s; }
+.section:nth-child(7) { animation-delay: 0.35s; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  nav { padding: 0 16px; }
+  .hero, .main { padding-left: 16px; padding-right: 16px; }
+  .condition-grid, .two-col, .three-col { grid-template-columns: 1fr; }
+  .stock-grid { grid-template-columns: repeat(3, 1fr); }
+  .formula-grid { grid-template-columns: repeat(2, 1fr); }
+  .pivot-results { grid-template-columns: repeat(3, 1fr); }
+  .risk-inputs, .risk-result-grid { grid-template-columns: 1fr 1fr; }
+  .section-desc { display: none; }
+  .journal-wrap { overflow-x: auto; }
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
+  margin: 40px 0;
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">⬡ EPAVSystem</div>
+  <div class="nav-links">
+    <a href="#overview" class="nav-link active">Overview</a>
+    <a href="#preparation" class="nav-link">Preparation</a>
+    <a href="#conditions" class="nav-link">4 Conditions</a>
+    <a href="#pivots" class="nav-link">Pivot Points</a>
+    <a href="#entry-exit" class="nav-link">Entry & Exit</a>
+    <a href="#checklist" class="nav-link">Daily Checklist</a>
+    <a href="#risk" class="nav-link">Risk Rules</a>
+    <a href="#journal" class="nav-link">Trade Journal</a>
+    <a href="#dos-donts" class="nav-link">Dos & Don'ts</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">15-Min Intraday System · NSE · Manual Trading Guide</div>
+  <h1>EMA + Pivot + ADX<br><span>+ Volume System</span></h1>
+  <p class="hero-sub">A complete, rule-based intraday trading system for NSE equity. Every condition, entry, exit, checklist, and journaling template — everything you need to trade this manually every single day.</p>
+
+  <div class="stock-tags">
+    <span class="stock-tag">RELIANCE</span>
+    <span class="stock-tag">HDFCBANK</span>
+    <span class="stock-tag">INFY</span>
+    <span class="stock-tag">TCS</span>
+    <span class="stock-tag">ICICIBANK</span>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-box">
+      <div class="stat-label">Timeframe</div>
+      <div class="stat-val w">15-Min</div>
+      <div class="stat-note">Signal chart</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Est. Win Rate</div>
+      <div class="stat-val g">52–58%</div>
+      <div class="stat-note">Strict rules only</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Risk : Reward</div>
+      <div class="stat-val b">1 : 1.8</div>
+      <div class="stat-note">Min 1:1.5 always</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Trades / Month</div>
+      <div class="stat-val a">15–25</div>
+      <div class="stat-note">Across 5 stocks</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Max Risk/Trade</div>
+      <div class="stat-val w">1–2%</div>
+      <div class="stat-note">Of total capital</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Best Window</div>
+      <div class="stat-val w">9:30–11:30</div>
+      <div class="stat-note">+ 1:30–2:45 PM</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STOCKS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">00</span>
+      <span class="section-title">Your 5 Trading Stocks</span>
+    </div>
+    <div class="stock-grid">
+      <div class="stock-card">
+        <div class="stock-ticker">RELIANCE</div>
+        <div class="stock-name">Reliance Industries</div>
+        <div class="stock-trait">Highest liquidity. Clean pivot reactions. Strong institutional activity. Best stock in this system.</div>
+      </div>
+      <div class="stock-card">
+        <div class="stock-ticker">HDFCBANK</div>
+        <div class="stock-name">HDFC Bank</div>
+        <div class="stock-trait">Consistent trending behaviour. Respects EMA levels. Low gap risk compared to peers.</div>
+      </div>
+      <div class="stock-card">
+        <div class="stock-ticker">INFY</div>
+        <div class="stock-name">Infosys</div>
+        <div class="stock-trait">Good intraday volume. Reacts well to global IT sentiment. Watch US markets pre-open.</div>
+      </div>
+      <div class="stock-card">
+        <div class="stock-ticker">TCS</div>
+        <div class="stock-name">TCS</div>
+        <div class="stock-trait">Steadier, slower moves. Fewer but cleaner setups. Best for learning — less noise.</div>
+      </div>
+      <div class="stock-card">
+        <div class="stock-ticker">ICICIBANK</div>
+        <div class="stock-name">ICICI Bank</div>
+        <div class="stock-trait">Strong intraday swings. Good volume spikes. Follows banking sector momentum.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREPARATION -->
+  <div class="section" id="preparation">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Pre-Market Preparation</span>
+      <span class="section-desc">8:45 AM – 9:15 AM</span>
+    </div>
+
+    <div class="two-col" style="margin-bottom:12px;">
+      <div class="card">
+        <div class="card-title"><span class="dot dot-gold"></span>Calculate Pivot Points</div>
+        <div class="card-body">
+          Use <strong>yesterday's High, Low, Close</strong> from NSE website or Zerodha Kite. Calculate P, R1, R2, S1, S2 for all 5 stocks. Use the calculator in Section 04. Mark these as <strong>horizontal lines</strong> on your TradingView chart before market opens.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="dot dot-blue"></span>Check Market Context</div>
+        <div class="card-body">
+          Check SGX Nifty / Gift Nifty for gap direction. Read any overnight news on your 5 stocks. Check if any stock has <strong>earnings, board meeting, or ex-dividend</strong> today — avoid trading those stocks on event days.
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-bottom:12px;">
+      <div class="card">
+        <div class="card-title"><span class="dot dot-green"></span>Set Up TradingView Charts</div>
+        <div class="card-body">
+          Open 15-min chart for each stock. Confirm these indicators are visible:<br><br>
+          <span class="pill pill-blue">9 EMA</span>&nbsp;
+          <span class="pill pill-blue">21 EMA</span>&nbsp;
+          <span class="pill pill-gold">ADX (14)</span>&nbsp;
+          <span class="pill pill-amber">Volume + 20 MA</span><br><br>
+          Add <strong>5 horizontal lines</strong> at pivot levels: S2, S1, P, R1, R2. Use different colors (red for S, gold for P, green for R).
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="dot dot-amber"></span>Note Previous Day Range</div>
+        <div class="card-body">
+          Calculate each stock's previous day High − Low range. <strong>If range is below ₹30, skip that stock today</strong> — insufficient volatility for meaningful intraday moves. Log this in your journal before market opens. Saves you from trading dead stocks.
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="warn-icon">⚠</span>
+      <span>On high-impact days — RBI Policy, Union Budget, US Fed announcements, quarterly earnings for your stocks — either sit out completely or reduce position size to 50% and use wider stops. News-driven gaps will invalidate pivot levels.</span>
+    </div>
+  </div>
+
+  <!-- 4 CONDITIONS -->
+  <div class="section" id="conditions">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">The 4 Conditions — All Must Be Met</span>
+      <span class="section-desc">Zero exceptions. Skip the trade if any one fails.</span>
+    </div>
+
+    <div class="info-box" style="margin-bottom:14px;">
+      <span style="font-size:15px; flex-shrink:0; margin-top:1px;">◈</span>
+      <span>This system's edge comes entirely from requiring ALL 4 conditions simultaneously. Removing even one condition — especially ADX or Volume — drops the win rate below breakeven. The conditions are the strategy.</span>
+    </div>
+
+    <div class="condition-grid">
+      <div class="condition-card ema">
+        <div class="condition-num">CONDITION 01</div>
+        <div class="condition-name">EMA Crossover — Trend Direction</div>
+        <div class="condition-rule">
+          <strong>For Long:</strong> 9 EMA has crossed above 21 EMA on the 15-min chart, within the last 3 candles. OR price has pulled back to the 21 EMA and bounced without closing below it.<br><br>
+          <strong>For Short:</strong> 9 EMA has crossed below 21 EMA. OR price bounced down from the 21 EMA after being below it.
+        </div>
+        <div class="condition-value">9 EMA / 21 EMA · 15-min</div>
+      </div>
+
+      <div class="condition-card pivot">
+        <div class="condition-num">CONDITION 02</div>
+        <div class="condition-name">Pivot Level — Price Trigger</div>
+        <div class="condition-rule">
+          <strong>For Long:</strong> Price closes above the Pivot (P), above R1, or bounces from S1 and closes back above P. The <strong>full 15-min candle must close</strong> above the level — wicks through don't count.<br><br>
+          <strong>For Short:</strong> Price closes below P, below S1, or rejects from R1 and closes below P.
+        </div>
+        <div class="condition-value">P · R1 · R2 · S1 · S2</div>
+      </div>
+
+      <div class="condition-card adx">
+        <div class="condition-num">CONDITION 03</div>
+        <div class="condition-name">ADX Reading — Trend Strength</div>
+        <div class="condition-rule">
+          ADX(14) value must be <strong>above 20</strong> at the time of entry candle close. This confirms the market is in a trending mode, not ranging.<br><br>
+          <strong>For Long:</strong> +DI line must be above -DI line.<br>
+          <strong>For Short:</strong> -DI line must be above +DI line.<br><br>
+          ADX below 20 = choppy market. <strong>No trade regardless of EMA or pivot.</strong>
+        </div>
+        <div class="condition-value">ADX(14) &gt; 20 · +DI/-DI check</div>
+      </div>
+
+      <div class="condition-card vol">
+        <div class="condition-num">CONDITION 04</div>
+        <div class="condition-name">Volume Spike — Confirmation</div>
+        <div class="condition-rule">
+          Volume on the signal candle must be <strong>at least 1.5× the 20-period average volume</strong>. This confirms institutional participation, not retail noise.<br><br>
+          Hover over the volume bar on TradingView — the value shows in top-left. Compare to the orange MA line. Bar must be <strong>visibly ~50% taller</strong> than the MA line.<br><br>
+          Low volume breakout = trap. No exceptions.
+        </div>
+        <div class="condition-value">Vol ≥ 1.5× · 20-bar MA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIVOT CALCULATOR -->
+  <div class="section" id="pivots">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Daily Pivot Point Calculator</span>
+      <span class="section-desc">Enter prev day H/L/C to get levels</span>
+    </div>
+
+    <div class="formula-grid" style="margin-bottom:14px;">
+      <div class="formula-box">
+        <div class="formula-label" style="color:var(--gold)">P — Pivot</div>
+        <div class="formula-eq">(High + Low + Close) ÷ 3</div>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label" style="color:var(--green)">R1</div>
+        <div class="formula-eq">(2 × P) − Low</div>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label" style="color:var(--green)">R2</div>
+        <div class="formula-eq">P + (High − Low)</div>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label" style="color:var(--red)">S1</div>
+        <div class="formula-eq">(2 × P) − High</div>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label" style="color:var(--red)">S2</div>
+        <div class="formula-eq">P − (High − Low)</div>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label" style="color:var(--teal)">R3</div>
+        <div class="formula-eq">High + 2×(P − Low)</div>
+      </div>
+    </div>
+
+    <div class="pivot-calc">
+      <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px;">Enter previous day's data</div>
+      <div class="pivot-inputs">
+        <div class="input-group">
+          <label>Previous High (₹)</label>
+          <input type="number" id="ph" placeholder="e.g. 2870.00" step="0.01">
+        </div>
+        <div class="input-group">
+          <label>Previous Low (₹)</label>
+          <input type="number" id="pl" placeholder="e.g. 2820.00" step="0.01">
+        </div>
+        <div class="input-group">
+          <label>Previous Close (₹)</label>
+          <input type="number" id="pc" placeholder="e.g. 2855.00" step="0.01">
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcPivot()">Calculate Pivot Levels</button>
+      <div class="pivot-results">
+        <div class="pivot-result-box pivot-r">
+          <div class="pivot-result-label">R2</div>
+          <div class="pivot-result-val" id="r2">—</div>
+        </div>
+        <div class="pivot-result-box pivot-r">
+          <div class="pivot-result-label">R1</div>
+          <div class="pivot-result-val" id="r1">—</div>
+        </div>
+        <div class="pivot-result-box pivot-p">
+          <div class="pivot-result-label">Pivot (P)</div>
+          <div class="pivot-result-val" id="pp">—</div>
+        </div>
+        <div class="pivot-result-box pivot-s">
+          <div class="pivot-result-label">S1</div>
+          <div class="pivot-result-val" id="s1">—</div>
+        </div>
+        <div class="pivot-result-box pivot-s">
+          <div class="pivot-result-label">S2</div>
+          <div class="pivot-result-val" id="s2">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENTRY EXIT -->
+  <div class="section" id="entry-exit">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Entry, Stop-Loss & Target Rules</span>
+    </div>
+
+    <div class="two-col" style="margin-bottom:12px;">
+      <div>
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--green); margin-bottom:10px; padding:8px 12px; background:var(--green-dim); border-radius:6px; border:1px solid var(--green-border);">▲ LONG (BUY) SETUP</div>
+        <table class="rule-table">
+          <tr><th>Parameter</th><th>Rule</th></tr>
+          <tr><td>Entry</td><td>Market buy at open of <strong>next candle</strong> after all 4 conditions confirmed on candle close. Never enter mid-candle.</td></tr>
+          <tr><td>Stop-Loss</td><td>Below S1 pivot level OR below the signal candle's low — whichever is <strong>closer to entry</strong>. Maximum stop = 0.5% of stock price.</td></tr>
+          <tr><td>Target 1</td><td>R1 level. Book <strong>60% of position</strong> here. Move stop to breakeven on remaining.</td></tr>
+          <tr><td>Target 2</td><td>R2 level. Trail stop to previous candle low on remaining 40%.</td></tr>
+          <tr><td>Time Stop</td><td>If trade doesn't move 0.3% in your favour within <strong>3 candles (45 min)</strong>, exit at market. Dead money.</td></tr>
+        </table>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--red); margin-bottom:10px; padding:8px 12px; background:var(--red-dim); border-radius:6px; border:1px solid var(--red-border);">▼ SHORT (SELL) SETUP</div>
+        <table class="rule-table">
+          <tr><th>Parameter</th><th>Rule</th></tr>
+          <tr><td>Entry</td><td>Market sell at open of next candle after all 4 conditions confirmed. Short sell requires MIS margin in Zerodha Kite.</td></tr>
+          <tr><td>Stop-Loss</td><td>Above R1 pivot level OR above signal candle's high — whichever is closer. Maximum stop = 0.5% of stock price.</td></tr>
+          <tr><td>Target 1</td><td>S1 level. Cover <strong>60% of short position</strong> here. Move stop to breakeven on rest.</td></tr>
+          <tr><td>Target 2</td><td>S2 level. Trail stop to previous candle high on remaining 40%.</td></tr>
+          <tr><td>Time Stop</td><td>Same rule — no movement in 45 min = exit. Also exit if ADX drops below 18 after entry.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="dot dot-gold"></span>Trade Timing Windows</div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:4px;">
+        <div style="background:var(--red-dim); border:1px solid var(--red-border); border-radius:8px; padding:12px; text-align:center;">
+          <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--red); margin-bottom:4px;">AVOID</div>
+          <div style="font-size:13px; font-weight:500; color:var(--text-primary);">9:15 – 9:30</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">Opening noise</div>
+        </div>
+        <div style="background:var(--green-dim); border:1px solid var(--green-border); border-radius:8px; padding:12px; text-align:center;">
+          <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--green); margin-bottom:4px;">BEST WINDOW</div>
+          <div style="font-size:13px; font-weight:500; color:var(--text-primary);">9:30 – 11:30</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">Prime session</div>
+        </div>
+        <div style="background:var(--green-dim); border:1px solid var(--green-border); border-radius:8px; padding:12px; text-align:center;">
+          <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--green); margin-bottom:4px;">GOOD WINDOW</div>
+          <div style="font-size:13px; font-weight:500; color:var(--text-primary);">1:30 – 2:45</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">Afternoon session</div>
+        </div>
+        <div style="background:var(--red-dim); border:1px solid var(--red-border); border-radius:8px; padding:12px; text-align:center;">
+          <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--red); margin-bottom:4px;">AVOID</div>
+          <div style="font-size:13px; font-weight:500; color:var(--text-primary);">3:00 – 3:30</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">End-of-day chaos</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold); margin-bottom:10px;">Trade Example — RELIANCE Long Setup</div>
+      <div class="example-box">
+        <div class="example-steps">
+          <div class="example-step"><strong>Pre-market:</strong> Calculated pivot levels. RELIANCE Prev H=2870, L=2820, C=2855. P=2848.33 · R1=2876.66 · S1=2826.66</div>
+          <div class="example-step"><strong>9:30 AM:</strong> Market opens. Both 9 EMA and 21 EMA are flat. ADX = 16 (below 20). No setup. Watching only.</div>
+          <div class="example-step"><strong>10:15 AM candle:</strong> 9 EMA crosses above 21 EMA. Price closes at ₹2,851 — above Pivot (₹2,848). ADX now = 23 with +DI above -DI. Volume bar = 1,18,000 vs 20-bar MA of 72,000 → ratio = 1.64×. <strong>All 4 conditions met.</strong></div>
+          <div class="example-step"><strong>10:30 AM candle open:</strong> Enter buy at ₹2,853. Stop-loss below S1 = ₹2,826 (stop = ₹27). Target 1 = R1 = ₹2,876 (profit = ₹23). Target 2 = R2 = ₹2,898 (profit = ₹45). R:R = 1 : 1.67 at T1 — acceptable.</div>
+          <div class="example-step"><strong>11:15 AM:</strong> Price hits R1 at ₹2,876. Exit 60% of position (+₹23/share). Move stop to ₹2,851 (breakeven) on remaining 40%.</div>
+          <div class="example-step"><strong>12:00 PM:</strong> Price reaches ₹2,892 (near R2). Exit remaining 40% position. Total trade: blended average gain = ~₹32/share on full position.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAILY CHECKLIST -->
+  <div class="section" id="checklist">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Daily Trading Checklist</span>
+      <span class="section-desc">Click each item to mark complete</span>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px; display:flex; align-items:center; gap:8px;"><span style="color:var(--gold);">◆</span> Before Market Opens (8:45–9:15 AM)</div>
+        <ul class="checklist" id="pre-list">
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">8:45 AM</span></span>
+            <span><strong>Calculate pivots</strong> for all 5 stocks using prev day H/L/C. Mark lines on TradingView.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">8:50 AM</span></span>
+            <span>Check <strong>Gift Nifty</strong> for gap direction. Note if gap &gt; 0.5% — be extra cautious today.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">8:55 AM</span></span>
+            <span>Scan for <strong>events today</strong> — earnings, RBI, results, dividends on your 5 stocks. Mark event stocks as "avoid today."</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">9:00 AM</span></span>
+            <span>Check <strong>previous day range</strong> (H−L) for each stock. Skip any stock with range &lt; ₹30.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">9:05 AM</span></span>
+            <span>Open <strong>TradingView 15-min charts</strong> for all 5 stocks. Confirm EMA(9,21), ADX(14), Volume(20MA) are loaded.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">9:10 AM</span></span>
+            <span>Set up <strong>Zerodha Kite</strong> with watchlist. Know the lot size and margin required for each stock.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">9:12 AM</span></span>
+            <span><strong>Write down today's max loss</strong> limit in your journal before markets open. This is non-negotiable.</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px; display:flex; align-items:center; gap:8px;"><span style="color:var(--green);">◆</span> During Market Hours</div>
+        <ul class="checklist">
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">9:15–9:30</span></span>
+            <span><strong>Do nothing.</strong> Watch the opening move. No trades in first 15 min. Let gap fill and volatility settle.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">Every candle</span></span>
+            <span>At <strong>each 15-min candle close</strong>, scan all 5 stocks for setup formation. Run the 4-condition check mentally.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">On setup</span></span>
+            <span>Before entering: <strong>EMA ✓ · Pivot ✓ · ADX&gt;20 ✓ · Volume≥1.5x ✓</strong> — all four. If any one is missing, skip.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">On entry</span></span>
+            <span>Enter at <strong>next candle open only</strong>. Place bracket order with stop and target simultaneously.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">Mid-session</span></span>
+            <span>If ADX drops below 18 on any open position, <strong>exit that trade</strong> — trend is dying.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">Max 3 trades</span></span>
+            <span>Stop trading after <strong>3 trades total</strong> per day across all stocks, or after daily loss limit is hit.</span>
+          </li>
+          <li>
+            <span class="check-box" onclick="toggleCheck(this)"></span>
+            <span><span class="time-tag">3:10 PM</span></span>
+            <span><strong>Exit all open intraday positions</strong> by 3:10 PM. No exceptions. Square off in Kite if needed.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px; display:flex; align-items:center; gap:8px;"><span style="color:var(--blue);">◆</span> After Market Closes (3:30–4:00 PM)</div>
+      <ul class="checklist">
+        <li>
+          <span class="check-box" onclick="toggleCheck(this)"></span>
+          <span><span class="time-tag">3:35 PM</span></span>
+          <span><strong>Log all trades</strong> in journal — stock, time, entry, exit, SL, target, P&L, conditions met.</span>
+        </li>
+        <li>
+          <span class="check-box" onclick="toggleCheck(this)"></span>
+          <span><span class="time-tag">3:40 PM</span></span>
+          <span>Rate each trade on <strong>rule-following (1–5 stars)</strong> independent of whether it was a winner or loser. A losing trade with all rules followed = 5 stars.</span>
+        </li>
+        <li>
+          <span class="check-box" onclick="toggleCheck(this)"></span>
+          <span><span class="time-tag">3:50 PM</span></span>
+          <span><strong>Calculate tomorrow's pivots</strong> using today's final H/L/C (available on NSE after 3:30 PM). Mark them for tomorrow.</span>
+        </li>
+        <li>
+          <span class="check-box" onclick="toggleCheck(this)"></span>
+          <span><span class="time-tag">Friday only</span></span>
+          <span><strong>Weekly review:</strong> Win rate this week, average R:R, which stocks performed best, any rule violations to correct.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- RISK MANAGEMENT -->
+  <div class="section" id="risk">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Risk Management Rules</span>
+      <span class="section-desc">Position sizing calculator below</span>
+    </div>
+
+    <div class="three-col" style="margin-bottom:14px;">
+      <div class="card">
+        <div class="card-title"><span class="dot dot-red"></span>Max Loss Per Trade</div>
+        <div class="card-body"><strong>1–2% of total capital.</strong> On ₹2L capital, that's ₹2,000–₹4,000 per trade maximum. Never risk more regardless of how strong the setup looks.</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="dot dot-amber"></span>Daily Loss Limit</div>
+        <div class="card-body"><strong>Stop trading if daily loss hits 3%.</strong> On ₹2L capital = ₹6,000 loss for the day. Close all charts, step away. Bad days are inevitable — don't compound them.</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="dot dot-gold"></span>Max Trades Per Day</div>
+        <div class="card-body"><strong>Maximum 3 trades</strong> across all 5 stocks combined. More trades = more noise = more rule violations. Quality over quantity is the edge.</div>
+      </div>
+    </div>
+
+    <div class="risk-calc">
+      <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px;">Position Size Calculator</div>
+      <div class="risk-inputs">
+        <div class="input-group">
+          <label>Total Capital (₹)</label>
+          <input type="number" id="rc" placeholder="e.g. 200000" value="200000">
+        </div>
+        <div class="input-group">
+          <label>Risk % Per Trade</label>
+          <input type="number" id="rp" placeholder="e.g. 2" value="2" step="0.1">
+        </div>
+        <div class="input-group">
+          <label>Stop-Loss Distance (₹)</label>
+          <input type="number" id="rs" placeholder="e.g. 27" step="0.5" oninput="calcRisk()">
+        </div>
+      </div>
+      <div class="risk-result-grid">
+        <div class="risk-result-box">
+          <div class="risk-result-label">Risk Amount</div>
+          <div class="risk-result-val" id="risk-amt">₹4,000</div>
+        </div>
+        <div class="risk-result-box">
+          <div class="risk-result-label">Shares to Buy</div>
+          <div class="risk-result-val" id="risk-qty">—</div>
+        </div>
+        <div class="risk-result-box">
+          <div class="risk-result-label">Daily Loss Limit</div>
+          <div class="risk-result-val" id="risk-daily">₹6,000</div>
+        </div>
+        <div class="risk-result-box">
+          <div class="risk-result-label">Capital at Risk</div>
+          <div class="risk-result-val" id="risk-cap">2%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRADE JOURNAL -->
+  <div class="section" id="journal">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">Trade Journal Template</span>
+      <span class="section-desc">Log every trade, every day</span>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-title"><span class="dot dot-gold"></span>Why journaling is non-negotiable</div>
+      <div class="card-body">
+        After 30 days of journaling, you will be able to answer: Which stock gives you the best win rate? What time of day do your best setups occur? Do you tend to skip the volume check? Are you exiting T1 too early? <strong>You cannot improve what you don't measure.</strong> Traders who journal consistently see their win rate improve 8–12% within 3 months purely from pattern recognition in their own mistakes.
+      </div>
+    </div>
+
+    <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Sample Log — What your journal should look like</div>
+    <div class="journal-wrap" style="overflow-x:auto;">
+      <div style="min-width:800px;">
+        <div class="journal-header">
+          <div class="journal-th">Date</div>
+          <div class="journal-th">Stock</div>
+          <div class="journal-th">Direction</div>
+          <div class="journal-th">Entry ₹</div>
+          <div class="journal-th">Exit ₹</div>
+          <div class="journal-th">SL ₹</div>
+          <div class="journal-th">P&L</div>
+          <div class="journal-th">Notes / Rules Followed</div>
+        </div>
+        <div class="journal-row">
+          <div class="journal-td">03-Jun-25</div>
+          <div class="journal-td ticker">RELIANCE</div>
+          <div class="journal-td" style="color:var(--green)">LONG</div>
+          <div class="journal-td">2853.00</div>
+          <div class="journal-td">2876.00</div>
+          <div class="journal-td">2826.00</div>
+          <div class="journal-td win">+₹2,070</div>
+          <div class="journal-td" style="font-size:11px;">All 4 ✓. T1 hit. Partial exit. ADX=23. Vol=1.64x. ★★★★★</div>
+        </div>
+        <div class="journal-row">
+          <div class="journal-td">03-Jun-25</div>
+          <div class="journal-td ticker">INFY</div>
+          <div class="journal-td" style="color:var(--green)">LONG</div>
+          <div class="journal-td">1842.00</div>
+          <div class="journal-td">1832.00</div>
+          <div class="journal-td">1828.00</div>
+          <div class="journal-td loss">−₹1,000</div>
+          <div class="journal-td" style="font-size:11px;">All 4 ✓. SL hit. ADX dropped mid-trade. Correct exit. ★★★★★</div>
+        </div>
+        <div class="journal-row">
+          <div class="journal-td">04-Jun-25</div>
+          <div class="journal-td ticker">HDFCBANK</div>
+          <div class="journal-td" style="color:var(--red)">SHORT</div>
+          <div class="journal-td">1735.00</div>
+          <div class="journal-td">1712.00</div>
+          <div class="journal-td">1748.00</div>
+          <div class="journal-td win">+₹3,450</div>
+          <div class="journal-td" style="font-size:11px;">4/4 cond. Strong -DI. Vol 2.1x. Held to T2. ★★★★★</div>
+        </div>
+        <div class="journal-row">
+          <div class="journal-td">04-Jun-25</div>
+          <div class="journal-td ticker">TCS</div>
+          <div class="journal-td" style="color:var(--green)">LONG</div>
+          <div class="journal-td">4102.00</div>
+          <div class="journal-td">4108.00</div>
+          <div class="journal-td">4082.00</div>
+          <div class="journal-td loss">−₹600</div>
+          <div class="journal-td" style="font-size:11px; color:var(--amber);">⚠ Vol only 1.3x (below 1.5x). Should have skipped. Rule violation. ★★☆☆☆</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Weekly review metrics to track</div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title"><span class="dot dot-blue"></span>Performance Metrics</div>
+          <div class="card-body">
+            Track: <strong>Total trades · Win rate % · Average win ₹ · Average loss ₹ · Profit factor · Max drawdown</strong>.<br><br>
+            Profit factor = Total wins ÷ Total losses. Anything above 1.5 is healthy. Below 1.2 means something is wrong.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot dot-teal"></span>Behaviour Metrics</div>
+          <div class="card-body">
+            Track: <strong>% of trades where all 4 conditions were met · Average star rating · Number of rule violations · Trades taken after daily loss limit</strong>.<br><br>
+            This is more important than P&L for the first 6 months.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOS AND DONTS -->
+  <div class="section" id="dos-donts">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <span class="section-title">Golden Rules — Dos & Don'ts</span>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--green); margin-bottom:10px;">Always Do</div>
+        <div class="rule-strip do">
+          <div class="rule-num">01</div>
+          <div class="rule-text"><strong>Wait for all 4 conditions.</strong> Not 3. Not "almost 4." All four. Every. Single. Time.</div>
+        </div>
+        <div class="rule-strip do">
+          <div class="rule-num">02</div>
+          <div class="rule-text"><strong>Enter at candle open, not mid-candle.</strong> Chasing a candle that's already moved 0.3% eliminates your R:R advantage.</div>
+        </div>
+        <div class="rule-strip do">
+          <div class="rule-num">03</div>
+          <div class="rule-text"><strong>Book 60% at T1 (R1 or S1).</strong> Protecting partial profits removes emotion from the remaining position.</div>
+        </div>
+        <div class="rule-strip do">
+          <div class="rule-num">04</div>
+          <div class="rule-text"><strong>Square off by 3:10 PM daily.</strong> Intraday positions held to close carry overnight risk on an intraday setup.</div>
+        </div>
+        <div class="rule-strip do">
+          <div class="rule-num">05</div>
+          <div class="rule-text"><strong>Journal every trade same day,</strong> while it's fresh. Note why you took it and what you'd do differently.</div>
+        </div>
+        <div class="rule-strip do">
+          <div class="rule-num">06</div>
+          <div class="rule-text"><strong>Sit out on event days.</strong> News releases, RBI policy, budget — pivot levels become meaningless when price gaps.</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--red); margin-bottom:10px;">Never Do</div>
+        <div class="rule-strip dont">
+          <div class="rule-num">01</div>
+          <div class="rule-text"><strong>Never average down on a losing trade.</strong> If your stop is hit, the trade is over. Adding to a loser kills accounts.</div>
+        </div>
+        <div class="rule-strip dont">
+          <div class="rule-num">02</div>
+          <div class="rule-text"><strong>Never trade after hitting your daily loss limit.</strong> Revenge trading after losses is the single biggest cause of account blowups.</div>
+        </div>
+        <div class="rule-strip dont">
+          <div class="rule-num">03</div>
+          <div class="rule-text"><strong>Never hold intraday positions overnight</strong> hoping for a gap-up. This is a day trading system. All positions close same day.</div>
+        </div>
+        <div class="rule-strip dont">
+          <div class="rule-num">04</div>
+          <div class="rule-text"><strong>Never trade the first 15 minutes</strong> (9:15–9:30 AM). Opening prices are manipulated by large players — unreliable for technical signals.</div>
+        </div>
+        <div class="rule-strip dont">
+          <div class="rule-num">05</div>
+          <div class="rule-text"><strong>Never take more than 3 trades per day.</strong> Overtrading is just gambling with extra steps. Your edge requires patience.</div>
+        </div>
+        <div class="rule-strip dont">
+          <div class="rule-num">06</div>
+          <div class="rule-text"><strong>Never skip the volume check</strong> because "the setup looks perfect." Low-volume breakouts at pivot levels are the most common retail trap in Indian markets.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="rule-strip note">
+        <div class="rule-num">★</div>
+        <div class="rule-text"><strong>The most important rule of all:</strong> A system with a 55% win rate only works if you take every valid setup and skip every invalid one with equal discipline. Selective rule-following — taking setups that "feel right" and skipping those that "feel off" — destroys the statistical edge entirely. Trust the system, not your gut, for the first 6 months.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PINE SCRIPT REMINDER -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <span class="section-title">TradingView Pine Script — Volume Spike Indicator</span>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-amber"></span>Paste this in TradingView Pine Editor → Add to Chart</div>
+      <pre style="background:var(--bg-elevated); border:1px solid var(--border-accent); border-radius:8px; padding:16px; font-family:'DM Mono',monospace; font-size:12px; color:#a5d6a7; line-height:1.8; overflow-x:auto; margin-top:8px; white-space:pre-wrap;">//@version=5
+indicator("Volume Spike 1.5x", overlay=false)
+vol_ma = ta.sma(volume, 20)
+is_spike = volume >= vol_ma * 1.5
+plot(vol_ma, color=color.orange, linewidth=2, title="20-bar Avg Volume")
+plot(volume, style=plot.style_columns, color=is_spike ? color.new(color.green, 20) : color.new(color.gray, 60))</pre>
+      <div class="card-body" style="margin-top:10px;">Volume bars turn <strong style="color:var(--green)">bright green</strong> when the 1.5× spike condition is met. Gray bars = below threshold = skip the trade. OHLC candle colors remain unchanged.</div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<footer>
+  EMA + Pivot + ADX + Volume System · 15-Min NSE Intraday · For Educational Purposes Only · Not SEBI Registered Investment Advice
+</footer>
+
+</div><!-- /page-wrap -->
+
+<script>
+// Nav active on scroll
+const sections = document.querySelectorAll('.section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 80) current = s.id;
+  });
+  navLinks.forEach(l => {
+    l.classList.remove('active');
+    if (l.getAttribute('href') === '#' + current) l.classList.add('active');
+  });
+});
+
+// Checklist toggle
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  el.textContent = el.classList.contains('checked') ? '✓' : '';
+}
+
+// Pivot calculator
+function calcPivot() {
+  const h = parseFloat(document.getElementById('ph').value);
+  const l = parseFloat(document.getElementById('pl').value);
+  const c = parseFloat(document.getElementById('pc').value);
+  if (isNaN(h) || isNaN(l) || isNaN(c)) return;
+  const P = (h + l + c) / 3;
+  const R1 = 2*P - l;
+  const R2 = P + (h - l);
+  const S1 = 2*P - h;
+  const S2 = P - (h - l);
+  const fmt = v => '₹' + v.toFixed(2);
+  document.getElementById('pp').textContent = fmt(P);
+  document.getElementById('r1').textContent = fmt(R1);
+  document.getElementById('r2').textContent = fmt(R2);
+  document.getElementById('s1').textContent = fmt(S1);
+  document.getElementById('s2').textContent = fmt(S2);
+}
+
+// Risk calculator
+function calcRisk() {
+  const cap = parseFloat(document.getElementById('rc').value) || 200000;
+  const rp = parseFloat(document.getElementById('rp').value) || 2;
+  const sl = parseFloat(document.getElementById('rs').value);
+  const riskAmt = (cap * rp) / 100;
+  document.getElementById('risk-amt').textContent = '₹' + Math.round(riskAmt).toLocaleString('en-IN');
+  document.getElementById('risk-daily').textContent = '₹' + Math.round(cap * 0.03).toLocaleString('en-IN');
+  document.getElementById('risk-cap').textContent = rp.toFixed(1) + '%';
+  if (!isNaN(sl) && sl > 0) {
+    const qty = Math.floor(riskAmt / sl);
+    document.getElementById('risk-qty').textContent = qty + ' shares';
+  } else {
+    document.getElementById('risk-qty').textContent = 'Enter SL ₹';
+  }
+}
+
+// Init risk display
+document.getElementById('rc').addEventListener('input', calcRisk);
+document.getElementById('rp').addEventListener('input', calcRisk);
+calcRisk();
+</script>
+</body>
+</html>

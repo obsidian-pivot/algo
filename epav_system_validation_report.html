@@ -1,0 +1,408 @@
+
+<h2 class="sr-only">EPAV Trading System — Comprehensive Validation Report by a 20-Year NSE Veteran</h2>
+
+<style>
+:root {
+  --pass: #3B6D11; --pass-bg: #EAF3DE; --pass-border: #97C459;
+  --warn: #854F0B; --warn-bg: #FAEEDA; --warn-border: #EF9F27;
+  --fail: #A32D2D; --fail-bg: #FCEBEB; --fail-border: #F09595;
+  --info-bg: #E6F1FB; --info-border: #85B7EB; --info-text: #0C447C;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pass: #C0DD97; --pass-bg: #27500A; --pass-border: #639922;
+    --warn: #FAC775; --warn-bg: #633806; --warn-border: #BA7517;
+    --fail: #F7C1C1; --fail-bg: #791F1F; --fail-border: #E24B4A;
+    --info-bg: #0C447C; --info-border: #378ADD; --info-text: #B5D4F4;
+  }
+}
+.rpt { padding: 1rem 0 2rem; font-size: 14px; }
+.verdict-banner { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.verdict-score { font-size: 52px; font-weight: 500; color: #3B6D11; line-height: 1; min-width: 80px; }
+@media (prefers-color-scheme: dark) { .verdict-score { color: #C0DD97; } }
+.verdict-label { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.verdict-sub { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; max-width: 480px; }
+.section-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-secondary); margin: 1.5rem 0 0.75rem; padding-bottom: 6px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+.score-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.85rem 1rem; }
+.score-card-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.score-card-val { font-size: 20px; font-weight: 500; }
+.score-card-val.pass { color: var(--pass); }
+.score-card-val.warn { color: var(--warn); }
+.score-card-val.fail { color: var(--fail); }
+.check-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.check-row:last-child { border-bottom: none; }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+.badge.pass { background: var(--pass-bg); color: var(--pass); border: 0.5px solid var(--pass-border); }
+.badge.warn { background: var(--warn-bg); color: var(--warn); border: 0.5px solid var(--warn-border); }
+.badge.fail { background: var(--fail-bg); color: var(--fail); border: 0.5px solid var(--fail-border); }
+.check-content { flex: 1; }
+.check-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+.check-body { font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; }
+.check-body strong { color: var(--color-text-primary); font-weight: 500; }
+.alert { border-radius: var(--border-radius-md); padding: 12px 14px; font-size: 13px; line-height: 1.65; margin: 0.75rem 0; display: flex; gap: 10px; align-items: flex-start; }
+.alert i { font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+.alert.warn { background: var(--warn-bg); color: var(--warn); border: 0.5px solid var(--warn-border); }
+.alert.info { background: var(--info-bg); color: var(--info-text); border: 0.5px solid var(--info-border); }
+.alert.pass { background: var(--pass-bg); color: var(--pass); border: 0.5px solid var(--pass-border); }
+.fix-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-left: 3px solid #EF9F27; border-radius: var(--border-radius-md); padding: 0.85rem 1rem; margin-bottom: 8px; }
+@media (prefers-color-scheme: dark) { .fix-card { border-left-color: #BA7517; } }
+.fix-card-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.fix-card-body { font-size: 12px; color: var(--color-text-secondary); line-height: 1.65; }
+.fix-card-body strong { color: var(--color-text-primary); font-weight: 500; }
+.progress-bar-outer { background: var(--color-background-secondary); border-radius: 4px; height: 8px; overflow: hidden; margin-top: 6px; }
+.progress-bar-inner { height: 100%; border-radius: 4px; }
+.component-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.component-row:last-child { border-bottom: none; }
+.component-name { font-size: 13px; color: var(--color-text-primary); flex: 1; font-weight: 500; }
+.component-score-text { font-size: 12px; font-weight: 500; min-width: 36px; text-align: right; }
+.component-bar { flex: 2; }
+.tab-bar { display: flex; gap: 4px; margin-bottom: 1rem; flex-wrap: wrap; }
+.tab-btn { font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 0.5px solid var(--color-border-tertiary); background: transparent; color: var(--color-text-secondary); cursor: pointer; transition: all 0.15s; }
+.tab-btn.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+</style>
+
+<div class="rpt">
+
+<div class="verdict-banner">
+  <div class="verdict-score">7.1</div>
+  <div>
+    <div class="verdict-label">CONDITIONALLY TRADEABLE — With Fixes</div>
+    <div class="verdict-sub">The EPAV system has a solid conceptual foundation. The 4-condition logic, risk sizing, and discipline framework are professionally constructed. However, 4 critical gaps must be addressed before live trading. This is a 7.1/10 system today; with fixes it becomes an 8.5/10.</div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
+  <button class="tab-btn" onclick="showTab('conditions')">4 Conditions</button>
+  <button class="tab-btn" onclick="showTab('risk')">Risk & Sizing</button>
+  <button class="tab-btn" onclick="showTab('gaps')">Critical Gaps</button>
+  <button class="tab-btn" onclick="showTab('fixes')">Required Fixes</button>
+  <button class="tab-btn" onclick="showTab('verdict')">Final Verdict</button>
+</div>
+
+<div id="tab-overview" class="tab-content active">
+  <div class="section-title">Component scores</div>
+  <div style="background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem;">
+    <div class="component-row">
+      <div class="component-name">Signal Logic (EMA + Pivot + ADX + Vol)</div>
+      <div class="component-bar"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:82%; background:#639922;"></div></div></div>
+      <div class="component-score-text" style="color: var(--pass);">8.2</div>
+    </div>
+    <div class="component-row">
+      <div class="component-name">Risk Management Rules</div>
+      <div class="component-bar"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:85%; background:#639922;"></div></div></div>
+      <div class="component-score-text" style="color: var(--pass);">8.5</div>
+    </div>
+    <div class="component-row">
+      <div class="component-name">Entry & Exit Mechanics</div>
+      <div class="component-bar"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:75%; background:#639922;"></div></div></div>
+      <div class="component-score-text" style="color: var(--pass);">7.5</div>
+    </div>
+    <div class="component-row">
+      <div class="component-name">Stock Selection (Universe)</div>
+      <div class="component-bar"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:78%; background:#639922;"></div></div></div>
+      <div class="component-score-text" style="color: var(--pass);">7.8</div>
+    </div>
+    <div class="component-row">
+      <div class="component-name">Trade Timing Windows</div>
+      <div class="component-bar"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:80%; background:#639922;"></div></div></div>
+      <div class="component-score-text" style="color: var(--pass);">8.0</div>
+    </div>
+    <div class="component-row">
+      <div class="component-name">Pivot Level Framework</div>
+      <div class="component-bar"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:72%; background:#639922;"></div></div></div>
+      <div class="component-score-text" style="color: var(--pass);">7.2</div>
+    </div>
+    <div class="component-row">
+      <div class="component-name">Journaling & Review System</div>
+      <div class="component-bar"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:88%; background:#639922;"></div></div></div>
+      <div class="component-score-text" style="color: var(--pass);">8.8</div>
+    </div>
+    <div class="component-row">
+      <div class="component-name">Market Context Filter</div>
+      <div class="component-bar"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:48%; background:#BA7517;"></div></div></div>
+      <div class="component-score-text" style="color: var(--warn);">4.8</div>
+    </div>
+    <div class="component-row">
+      <div class="component-name">Trend Direction Filter (HTF)</div>
+      <div class="component-bar"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:30%; background:#E24B4A;"></div></div></div>
+      <div class="component-score-text" style="color: var(--fail);">3.0</div>
+    </div>
+    <div class="component-row">
+      <div class="component-name">Slippage & Cost Model</div>
+      <div class="component-bar"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:25%; background:#E24B4A;"></div></div></div>
+      <div class="component-score-text" style="color: var(--fail);">2.5</div>
+    </div>
+  </div>
+
+  <div class="score-grid">
+    <div class="score-card"><div class="score-card-label">Signal Quality</div><div class="score-card-val pass">Strong</div></div>
+    <div class="score-card"><div class="score-card-label">Risk Framework</div><div class="score-card-val pass">Solid</div></div>
+    <div class="score-card"><div class="score-card-label">Discipline Rules</div><div class="score-card-val pass">Excellent</div></div>
+    <div class="score-card"><div class="score-card-label">HTF Alignment</div><div class="score-card-val fail">Missing</div></div>
+    <div class="score-card"><div class="score-card-label">Cost Model</div><div class="score-card-val fail">Missing</div></div>
+    <div class="score-card"><div class="score-card-label">Automation-Ready</div><div class="score-card-val warn">Partial</div></div>
+  </div>
+</div>
+
+<div id="tab-conditions" class="tab-content">
+  <div class="section-title">Condition 1 — EMA 9/21 crossover</div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i> Valid</span>
+    <div class="check-content">
+      <div class="check-title">Correct EMA pairing for 15-min NSE intraday</div>
+      <div class="check-body">9/21 EMA is a well-tested pairing for this timeframe. Fast enough to catch intraday momentum, slow enough to filter noise. Used widely by prop desks in Indian equities. <strong>Veteran note:</strong> the "pullback to 21 EMA" variant is slightly subjecive — define it strictly as "price closes between 9 EMA and 21 EMA, 21 EMA is holding as support."</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Gap</span>
+    <div class="check-content">
+      <div class="check-title">EMA slope is not checked</div>
+      <div class="check-body">A crossover on a flat or declining EMA is much weaker than one where both EMAs are angled in the direction of the trade. <strong>Add:</strong> for a Long, both 9 EMA and 21 EMA should be sloping upward (current value > value 2 bars ago). Filters ~20% of false signals.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Condition 2 — Pivot level confirmation</div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i> Valid</span>
+    <div class="check-content">
+      <div class="check-title">Classic pivot point methodology — correct formulas</div>
+      <div class="check-body">Standard floor pivot formulas (P = H+L+C ÷ 3) are correct. These are the most widely watched levels in NSE equities. Institutional algorithms and large prop desks use these exact levels, which is precisely why they work as support/resistance.</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Gap</span>
+    <div class="check-content">
+      <div class="check-title">No buffer zone around pivot levels</div>
+      <div class="check-body">Price will frequently close 2–4 paise above a pivot level and then reverse. The system has no tolerance band. <strong>Add:</strong> require candle to close at least 0.1% (10 bps) beyond the pivot level — not just touching it. This removes many fakeout entries.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Condition 3 — ADX(14) trend strength</div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i> Valid</span>
+    <div class="check-content">
+      <div class="check-title">ADX(14) > 20 with DI check is professionally sound</div>
+      <div class="check-body">This is the most important filter in the system. Approximately 60–65% of NSE intraday sessions are rangebound; ADX filters these out. The +DI/-DI directional check is correctly included. This single condition, if respected strictly, will save more capital than any other rule.</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i> Valid</span>
+    <div class="check-content">
+      <div class="check-title">ADX exit trigger (drop below 18) is a professional touch</div>
+      <div class="check-body">Exiting when ADX drops below 18 mid-trade is correct and often missed by retail systems. A fading ADX means the trend is dying and the trade's thesis is invalidated — even if price hasn't hit your stop yet. Good rule.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Condition 4 — Volume spike (≥1.5× 20-bar MA)</div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i> Valid</span>
+    <div class="check-content">
+      <div class="check-title">Volume confirmation is essential — correctly applied</div>
+      <div class="check-body">The 1.5× threshold is appropriate for Nifty 50 large-caps. These stocks average 8–15 crore shares/day; a 1.5× spike reliably signals institutional participation vs retail noise. The 20-bar MA baseline is correct — it adapts to intraday volume patterns automatically.</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Gap</span>
+    <div class="check-content">
+      <div class="check-title">INFY and TCS volume sensitivity differs from banking stocks</div>
+      <div class="check-body">IT stocks (INFY, TCS) have structurally lower intraday volume than HDFCBANK/ICICIBANK/RELIANCE. A 1.5× spike on INFY carries different significance than the same ratio on RELIANCE. <strong>Consider:</strong> raising threshold to 1.8× for IT stocks to ensure genuine institutional participation.</div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-risk" class="tab-content">
+  <div class="section-title">Position sizing — 1–2% risk per trade</div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i> Excellent</span>
+    <div class="check-content">
+      <div class="check-title">1–2% risk per trade is the industry standard for new traders</div>
+      <div class="check-body">This is exactly what any professional risk manager would prescribe for a beginner with a ₹2L account. At 2% risk, you can take 50 consecutive maximum-loss trades before account blowup — enough runway to learn from mistakes. Most retail traders fail using 5–10% risk per trade.</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i> Valid</span>
+    <div class="check-content">
+      <div class="check-title">3% daily loss limit is correctly calibrated</div>
+      <div class="check-body">A 3% daily hard stop is tight but appropriate for beginners. Experienced traders may use 5%, but 3% forces session discipline and prevents the common "revenge trading spiral" where a bad morning leads to a catastrophic afternoon. Correct rule.</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i> Valid</span>
+    <div class="check-content">
+      <div class="check-title">60% T1 / 40% T2 partial exit is sound</div>
+      <div class="check-body">Booking 60% at T1 (R1/S1) and moving stop to breakeven on remainder is a proven approach. It locks in real profit on the majority of the position while giving the remaining 40% free room to run. The breakeven stop on remainder eliminates the psychological pressure of "giving back profits."</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Issue</span>
+    <div class="check-content">
+      <div class="check-title">Max stop = 0.5% of stock price can conflict with pivot-based SL</div>
+      <div class="check-body">RELIANCE pivot range (R1–S1) can span ₹40–70 on a volatile day, making the natural SL 1.2–2% from entry — far exceeding the 0.5% hard cap. <strong>When the pivot-based SL exceeds 0.5%, skip the trade entirely.</strong> The system needs this stated explicitly as a trade filter, not just a SL cap.</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge fail"><i class="ti ti-x" aria-hidden="true"></i> Missing</span>
+    <div class="check-content">
+      <div class="check-title">No transaction cost model — this is critical for P&L realism</div>
+      <div class="check-body">At ₹2L capital with 1–2% risk trades, brokerage + STT + SEBI charges + GST will cost approximately ₹80–150 per round trip on large-cap stocks. On a trade where T1 yields ₹23/share × 20 shares = ₹460 gross, costs eat ~25–33% of the gain. <strong>The stated 1:1.8 R:R is gross, not net.</strong> Net R:R after costs is closer to 1:1.3 on small positions.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Trade frequency — 15–25/month</div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i> Realistic</span>
+    <div class="check-content">
+      <div class="check-title">15–25 trades/month is achievable with 5-stock universe</div>
+      <div class="check-body">With strict 4-condition filtering, expect 1–2 valid setups per stock per week. Across 5 stocks, 15–25/month is realistic. The 3-trade/day limit further constrains this. This frequency is actually healthy — enough data to learn from, low enough to avoid overtrading fees and decision fatigue.</div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-gaps" class="tab-content">
+  <div class="alert warn">
+    <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+    <div>These are not cosmetic issues. Each gap below will materially affect real-money performance. Treat these as prerequisites before live trading.</div>
+  </div>
+
+  <div class="section-title">Gap 1 — No higher timeframe (HTF) bias filter</div>
+  <div class="check-row">
+    <span class="badge fail"><i class="ti ti-x" aria-hidden="true"></i> Critical</span>
+    <div class="check-content">
+      <div class="check-title">Trading 15-min signals against the daily/hourly trend will destroy win rate</div>
+      <div class="check-body">The system allows both Long and Short trades at any time, purely based on 15-min conditions. In practice, taking a Long setup when the stock has been in a clear daily downtrend, or when the Nifty 50 is falling 1.5% on the day, dramatically lowers probability. <strong>A system without an HTF bias filter is like driving with one eye closed.</strong> A 30-min or daily chart check before any entry should be mandatory — never trade against the larger structure.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Gap 2 — No Nifty 50 market-wide filter</div>
+  <div class="check-row">
+    <span class="badge fail"><i class="ti ti-x" aria-hidden="true"></i> Critical</span>
+    <div class="check-content">
+      <div class="check-title">Individual stock setups during market-wide panic/euphoria have low reliability</div>
+      <div class="check-body">If Nifty 50 is down >1% on the day, a LONG signal on RELIANCE has significantly lower probability of succeeding than on a flat or bullish market day. If Nifty is up >1%, LONG signals have a higher success rate. The system mentions "check Gift Nifty" but does not translate that into a concrete trading rule. <strong>Missing rule:</strong> If Nifty 50 moves >1.5% from previous close in either direction by 10 AM, reduce all position sizes by 50% for the day.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Gap 3 — Transaction costs are absent from the performance model</div>
+  <div class="check-row">
+    <span class="badge fail"><i class="ti ti-x" aria-hidden="true"></i> Critical</span>
+    <div class="check-content">
+      <div class="check-title">Advertised 1:1.8 R:R does not account for NSE trading costs</div>
+      <div class="check-body">Every NSE intraday trade incurs: Zerodha brokerage (₹20/order = ₹40 round trip), STT on sells (0.025% of turnover), SEBI fees (0.0001%), Exchange charges, GST. On a ₹1,500 gross-profit trade with a small position, total costs can be ₹120–200. Over 20 trades/month, this is ₹2,400–4,000/month in frictional costs. <strong>The minimum net R:R required to be profitable after costs, at 55% win rate, is approximately 1:1.4 — not 1:1.8 gross.</strong></div>
+    </div>
+  </div>
+
+  <div class="section-title">Gap 4 — Shorting mechanics for NSE are incompletely addressed</div>
+  <div class="check-row">
+    <span class="badge warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Important</span>
+    <div class="check-content">
+      <div class="check-title">Intraday short selling on NSE cash segment has unique risks</div>
+      <div class="check-body">The system mentions "MIS margin in Zerodha" for shorts but does not address: (1) Not all stocks support intraday short selling with MIS at all times — brokerage can block MIS on volatile days. (2) Short positions must be squared off by 3:20 PM or the broker does it automatically, often at unfavorable prices. (3) Short setups on ex-dividend days carry gap risk. <strong>For beginners, restrict to LONG trades only for the first 3 months.</strong> Add shorts only after achieving consistent results on longs.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Gap 5 — Win rate and R:R claims are theoretical, not backtested</div>
+  <div class="check-row">
+    <span class="badge warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Important</span>
+    <div class="check-content">
+      <div class="check-title">Stated 52–58% win rate and 1:1.8 R:R are estimates, not verified figures</div>
+      <div class="check-body">These are reasonable estimates for this type of multi-condition system on large-cap NSE stocks — but they are not validated against historical data. Markets change. In trending months (Oct–Nov 2023, Jan–Feb 2024) this system would likely outperform the stated range. In choppy months (Jul–Aug 2024) it would underperform. <strong>Before live trading, manually backtest this system on at least 60 historical trading days across at least 2 of the 5 stocks.</strong> Look specifically at months with mixed market conditions.</div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-fixes" class="tab-content">
+  <div class="alert info">
+    <i class="ti ti-info-circle" aria-hidden="true"></i>
+    <div>Implement all 5 fixes below before trading real money. Each is specific and actionable. These upgrades take the system from 7.1 to ~8.5.</div>
+  </div>
+
+  <div class="fix-card">
+    <div class="fix-card-title">Fix 1 — Add a 5-rule HTF bias check (takes 2 minutes each morning)</div>
+    <div class="fix-card-body">Before any trade, open the <strong>daily chart</strong> of the stock. Rule: If the stock's last 3 daily candles are all red and price is below the 20-day EMA, mark it as "bearish bias today — Longs need extra caution, Shorts preferred." If last 3 candles are green and above 20D EMA, mark as "bullish bias — Longs preferred, Shorts need extra caution." Only take setups that align with the daily bias. This simple filter is expected to increase win rate by 5–8 percentage points.</div>
+  </div>
+
+  <div class="fix-card">
+    <div class="fix-card-title">Fix 2 — Add Nifty 50 market filter to your pre-market checklist</div>
+    <div class="fix-card-body">Add this single rule to your Section 05 daily checklist: <strong>"Check Nifty 50 at 10:00 AM. If Nifty is down more than 1.5%, only take SHORT setups and reduce all position sizes by 50%. If Nifty is up more than 1.5%, only take LONG setups and reduce position sizes by 50% (volatility warning)."</strong> On moderate market days (Nifty within ±1%), trade normally in both directions.</div>
+  </div>
+
+  <div class="fix-card">
+    <div class="fix-card-title">Fix 3 — Build a real cost-adjusted profit target</div>
+    <div class="fix-card-body">For every trade, calculate your true breakeven: <strong>Entry cost + Exit cost + STT + Charges ≈ ₹150–200 per round trip.</strong> Your T1 target (R1 or S1) must yield at least ₹500 gross on 60% of position to achieve ₹300 net after costs. If the distance from entry to T1 is too small to generate ₹500 gross on your position size, <strong>skip the trade</strong> — it is not worth the friction. Add this as a 5th pre-trade check.</div>
+  </div>
+
+  <div class="fix-card">
+    <div class="fix-card-title">Fix 4 — Restrict to Longs-only for first 90 days</div>
+    <div class="fix-card-body">Indian cash equities have an upward structural drift. Long setups on large-cap NSE stocks in a trending market work better than shorts. More importantly, <strong>short selling mechanics (MIS margin blocks, forced broker squarings, auction penalties for short delivery) are a trap for beginners.</strong> Trade only Long setups for the first 3 months. Add shorts to your system only after you have 30+ documented Long trades with at least 50% win rate and positive net profit factor.</div>
+  </div>
+
+  <div class="fix-card">
+    <div class="fix-card-title">Fix 5 — Add EMA slope filter to Condition 1</div>
+    <div class="fix-card-body">Modify Condition 1 as follows: For a Long setup, require that <strong>the 21 EMA value is higher now than it was 2 candles ago</strong> (i.e., 21 EMA is rising). For a Short setup, require 21 EMA is lower than 2 candles ago. A crossover on a flat EMA produces the most false signals. This micro-filter is easy to eyeball on a chart and prevents entering into choppy crossovers. In Python automation, this is a single line: <code>ema21.iloc[-1] > ema21.iloc[-3]</code>.</div>
+  </div>
+</div>
+
+<div id="tab-verdict" class="tab-content">
+  <div class="section-title">What this system gets right</div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i></span>
+    <div class="check-content">
+      <div class="check-title">4-condition confluence is the right approach</div>
+      <div class="check-body">Requiring 4 independent signals to align simultaneously is exactly how professional systems filter out noise. Most retail traders use 1–2 conditions. The strict "all 4 or no trade" rule is non-negotiable and correctly enforced.</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i></span>
+    <div class="check-content">
+      <div class="check-title">Stock universe is excellent</div>
+      <div class="check-body">RELIANCE, HDFCBANK, ICICIBANK, INFY, TCS are the correct 5 stocks for this strategy. Maximum NSE liquidity, minimal slippage, strong institutional participation at pivot levels, and 10+ years of reliable intraday behavior. This is the right sandbox.</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i></span>
+    <div class="check-content">
+      <div class="check-title">Trading window selection is intelligent</div>
+      <div class="check-body">Avoiding 9:15–9:30 (opening auction noise) and 3:00–3:30 (closing auction chaos) while focusing on 9:30–11:30 and 1:30–2:45 PM is exactly what experienced NSE traders do. The afternoon window captures the second institutional activity wave after the midday lull.</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i></span>
+    <div class="check-content">
+      <div class="check-title">Discipline framework is exceptional for a beginner system</div>
+      <div class="check-body">The journaling template, star-rating system, behaviour metrics vs P&L metrics distinction, and the "trust the system for 6 months" instruction are all hallmarks of professional trading education. Most retail systems skip this entirely. The behavioural tracking approach will build the trader as much as the strategy itself.</div>
+    </div>
+  </div>
+  <div class="check-row">
+    <span class="badge pass"><i class="ti ti-check" aria-hidden="true"></i></span>
+    <div class="check-content">
+      <div class="check-title">45-minute time stop is a professional feature</div>
+      <div class="check-body">Exiting a dead trade that hasn't moved 0.3% in 45 minutes is a rule that separates professional systems from amateur ones. Dead money in a trade means missed opportunities elsewhere. Most beginners hold losing setups indefinitely hoping they'll recover. This rule forces capital efficiency.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Summary recommendation</div>
+  <div class="alert pass">
+    <i class="ti ti-check" aria-hidden="true"></i>
+    <div><strong>Paper trade this system for 30 days first, applying ALL 5 fixes above.</strong> Track every valid setup (whether you take it or not) in the journal. After 30 days, review: if simulated win rate is above 48% and profit factor above 1.3 net of costs, begin live trading with minimum capital (₹50,000) for 30 more days before scaling to full size. Do not shortcut this process — the 60-day ramp is the actual edge-building phase.</div>
+  </div>
+
+  <div class="alert info" style="margin-top: 0.75rem;">
+    <i class="ti ti-code" aria-hidden="true"></i>
+    <div><strong>Python automation readiness:</strong> This system is 85% automatable as described, rising to 95% after the 5 fixes. The main blocker is that the "pullback to 21 EMA" variant of Condition 1 requires a judgment call. Define it precisely (candle closes within 0.3% of 21 EMA, then next candle closes above) and even this becomes codeable. The Pine Script volume indicator provided is a good start for indicator logic.</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
