@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ObsidianPivot — Build Your Algo From Scratch</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   OBSIDIAN PIVOT — BUILDER'S GUIDE
+   Aesthetic: Dark terminal + precision editorial
+   ═══════════════════════════════════════════════════ */
+:root {
+  --void:       #04060A;
+  --deep:       #080C14;
+  --base:       #0D1320;
+  --layer:      #111826;
+  --raised:     #172030;
+  --card:       #1A2638;
+  --card2:      #1F2D40;
+  --border:     rgba(255,255,255,0.06);
+  --border2:    rgba(255,255,255,0.11);
+  --border3:    rgba(255,255,255,0.18);
+
+  --teal:       #06D6A0;
+  --teal2:      #04B384;
+  --teal3:      #028562;
+  --teal-glow:  rgba(6,214,160,0.12);
+  --teal-dim:   rgba(6,214,160,0.06);
+
+  --amber:      #FFB703;
+  --amber2:     #D4980A;
+  --amber-glow: rgba(255,183,3,0.10);
+
+  --rose:       #EF476F;
+  --rose-dim:   rgba(239,71,111,0.08);
+
+  --sky:        #4CC9F0;
+  --sky-dim:    rgba(76,201,240,0.08);
+
+  --violet:     #7B5EA7;
+  --violet-dim: rgba(123,94,167,0.10);
+
+  --lime:       #8DC86A;
+  --lime-dim:   rgba(141,200,106,0.08);
+
+  --text1:  #E2EAF4;
+  --text2:  #8FA3BC;
+  --text3:  #4E6480;
+  --text4:  #2D3D52;
+
+  --font-head: 'Space Grotesk', sans-serif;
+  --font-body: 'Cormorant Garamond', Georgia, serif;
+  --font-code: 'Fira Code', monospace;
+
+  --r: 10px;
+  --r2: 14px;
+  --max: 1200px;
+  --pad: 64px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--void);
+  color: var(--text1);
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: var(--teal3); border-radius: 2px; }
+
+/* ── GRID BG ── */
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(6,214,160,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6,214,160,0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+
+/* ══════════════════════════════
+   SIDEBAR
+══════════════════════════════ */
+.sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 240px;
+  background: var(--deep);
+  border-right: 1px solid var(--border2);
+  z-index: 100;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar::-webkit-scrollbar { width: 2px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--teal3); }
+
+.sb-brand {
+  padding: 28px 22px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.sb-logo {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--teal3), var(--teal));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-head);
+  font-weight: 700; font-size: 17px;
+  color: var(--void);
+  margin-bottom: 12px;
+}
+.sb-name {
+  font-family: var(--font-head);
+  font-size: 13px; font-weight: 700;
+  color: var(--text1);
+  letter-spacing: 0.02em;
+}
+.sb-tag {
+  font-family: var(--font-code);
+  font-size: 9px;
+  color: var(--teal);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.sb-section {
+  padding: 16px 22px 6px;
+  font-family: var(--font-code);
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text4);
+}
+.sb-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 22px;
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--text3);
+  text-decoration: none;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  line-height: 1.3;
+}
+.sb-link:hover, .sb-link.active {
+  color: var(--teal);
+  border-left-color: var(--teal);
+  background: var(--teal-dim);
+}
+.sb-pip {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--text4);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.sb-link:hover .sb-pip,
+.sb-link.active .sb-pip { background: var(--teal); }
+
+.sb-step-num {
+  font-family: var(--font-code);
+  font-size: 8px;
+  color: var(--teal3);
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+/* ══════════════════════════════
+   MAIN CONTENT
+══════════════════════════════ */
+.main { margin-left: 240px; position: relative; z-index: 1; }
+
+/* ══════════════════════════════
+   HERO
+══════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  background: var(--deep);
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 80px var(--pad);
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 700px; height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(6,214,160,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: 40%;
+  width: 500px; height: 400px;
+  background: radial-gradient(circle, rgba(255,183,3,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-inner { position: relative; z-index: 1; max-width: 900px; }
+.hero-pre {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-code);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 28px;
+}
+.hero-pre::before {
+  content: '';
+  display: block;
+  width: 40px; height: 1px;
+  background: var(--teal);
+}
+.hero-h1 {
+  font-family: var(--font-head);
+  font-size: clamp(44px, 6.5vw, 82px);
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+}
+.hero-h1 .accent { color: var(--teal); }
+.hero-h1 .dim { color: var(--text2); }
+.hero-sub {
+  font-family: var(--font-body);
+  font-size: clamp(17px, 2.2vw, 22px);
+  color: var(--text2);
+  font-weight: 300;
+  font-style: italic;
+  margin-bottom: 40px;
+  max-width: 640px;
+  line-height: 1.65;
+}
+
+.hero-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 48px;
+}
+.pill {
+  font-family: var(--font-code);
+  font-size: 10px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.06em;
+  border: 1px solid;
+}
+.pill-teal { border-color: var(--teal3); color: var(--teal); background: var(--teal-dim); }
+.pill-amber { border-color: var(--amber2); color: var(--amber); background: var(--amber-glow); }
+.pill-rose { border-color: rgba(239,71,111,0.3); color: var(--rose); background: var(--rose-dim); }
+.pill-sky { border-color: rgba(76,201,240,0.3); color: var(--sky); background: var(--sky-dim); }
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  overflow: hidden;
+  max-width: 680px;
+}
+.hs { background: var(--base); padding: 18px 14px; text-align: center; }
+.hs-val {
+  font-family: var(--font-head);
+  font-size: 26px; font-weight: 700;
+  display: block; margin-bottom: 3px;
+}
+.hs-val.t { color: var(--teal); }
+.hs-val.a { color: var(--amber); }
+.hs-val.s { color: var(--sky); }
+.hs-lbl { font-family: var(--font-code); font-size: 8.5px; color: var(--text3); letter-spacing: 0.07em; }
+
+.hero-corner {
+  position: absolute;
+  top: 40px; right: var(--pad);
+  font-family: var(--font-code);
+  font-size: 9px;
+  color: var(--text4);
+  text-align: right;
+  line-height: 2;
+}
+.hero-corner span { color: var(--teal3); display: block; font-size: 11px; }
+
+/* ══════════════════════════════
+   CONTENT SECTIONS
+══════════════════════════════ */
+.content-wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--pad);
+}
+
+.section {
+  padding: 80px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sec-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-code);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 14px;
+}
+.sec-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--teal3), transparent);
+}
+.sec-h {
+  font-family: var(--font-head);
+  font-size: clamp(28px, 3.8vw, 46px);
+  font-weight: 700;
+  color: var(--text1);
+  line-height: 1.1;
+  margin-bottom: 14px;
+  letter-spacing: -0.02em;
+}
+.sec-sub {
+  font-family: var(--font-body);
+  font-size: 18px;
+  color: var(--text2);
+  font-weight: 300;
+  max-width: 700px;
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+
+/* ══════════════════════════════
+   STEP CARDS (Build Steps)
+══════════════════════════════ */
+.build-step {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 0 28px;
+  margin-bottom: 0;
+  position: relative;
+}
+.build-step::before {
+  content: '';
+  position: absolute;
+  left: 29px;
+  top: 60px;
+  bottom: -1px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--teal3), transparent);
+}
+.build-step:last-child::before { display: none; }
+
+.step-num-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 4px;
+}
+.step-circle {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--base);
+  border: 1.5px solid var(--teal3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-head);
+  font-size: 15px; font-weight: 700;
+  color: var(--teal);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.step-body {
+  padding-bottom: 48px;
+}
+.step-tag {
+  font-family: var(--font-code);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+.step-title {
+  font-family: var(--font-head);
+  font-size: 22px; font-weight: 700;
+  color: var(--text1);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+.step-desc {
+  font-size: 16px;
+  color: var(--text2);
+  line-height: 1.75;
+  margin-bottom: 18px;
+  max-width: 720px;
+}
+.step-desc strong { color: var(--text1); font-weight: 600; }
+.step-desc em { color: var(--teal); font-style: normal; }
+
+/* ══════════════════════════════
+   FILE CARDS
+══════════════════════════════ */
+.file-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 24px 0;
+}
+.file-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.file-card:hover {
+  border-color: var(--border3);
+  transform: translateY(-2px);
+}
+.file-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.fc-teal::before   { background: var(--teal); }
+.fc-amber::before  { background: var(--amber); }
+.fc-rose::before   { background: var(--rose); }
+.fc-sky::before    { background: var(--sky); }
+.fc-violet::before { background: var(--violet); }
+.fc-lime::before   { background: var(--lime); }
+
+.file-name {
+  font-family: var(--font-code);
+  font-size: 13px;
+  color: var(--teal);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.file-role {
+  font-family: var(--font-head);
+  font-size: 13px; font-weight: 600;
+  color: var(--text1);
+  margin-bottom: 7px;
+}
+.file-desc {
+  font-size: 13px;
+  color: var(--text3);
+  line-height: 1.6;
+}
+.file-tag {
+  display: inline-block;
+  font-family: var(--font-code);
+  font-size: 8px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  margin-top: 8px;
+  letter-spacing: 0.06em;
+}
+.ft-broker { background: rgba(239,71,111,0.12); color: var(--rose); border: 1px solid rgba(239,71,111,0.2); }
+.ft-logic  { background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal3); }
+.ft-data   { background: var(--sky-dim); color: var(--sky); border: 1px solid rgba(76,201,240,0.2); }
+.ft-risk   { background: var(--amber-glow); color: var(--amber); border: 1px solid var(--amber2); }
+.ft-util   { background: var(--violet-dim); color: #A78BCC; border: 1px solid rgba(123,94,167,0.3); }
+
+/* ══════════════════════════════
+   CODE BLOCKS
+══════════════════════════════ */
+.code-wrap {
+  background: var(--void);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  overflow: hidden;
+  margin: 18px 0;
+}
+.code-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: var(--base);
+  border-bottom: 1px solid var(--border);
+}
+.code-dots { display: flex; gap: 5px; }
+.cd { width: 10px; height: 10px; border-radius: 50%; }
+.cd-r { background: #FF5F57; }
+.cd-y { background: #FFBD2E; }
+.cd-g { background: #28C840; }
+.code-fname { font-family: var(--font-code); font-size: 11px; color: var(--text2); }
+.code-lang  { font-family: var(--font-code); font-size: 9px; color: var(--teal); letter-spacing: 0.1em; text-transform: uppercase; }
+.code-body  {
+  padding: 20px 22px;
+  font-family: var(--font-code);
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--text2);
+  overflow-x: auto;
+  white-space: pre;
+}
+/* syntax */
+.k { color: #C792EA; }
+.f { color: #82AAFF; }
+.s { color: #C3E88D; }
+.c { color: #3D5268; font-style: italic; }
+.n { color: var(--teal); }
+.cl{ color: #FFCB6B; }
+.p { color: var(--text2); }
+.v { color: #F78C6C; }
+
+/* ══════════════════════════════
+   SECTION BLOCKS
+══════════════════════════════ */
+.sec-block {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  padding: 26px 28px;
+  margin: 18px 0;
+  position: relative;
+  overflow: hidden;
+}
+.sec-block::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+}
+.sb-teal::before   { background: var(--teal); }
+.sb-amber::before  { background: var(--amber); }
+.sb-rose::before   { background: var(--rose); }
+.sb-sky::before    { background: var(--sky); }
+.sb-violet::before { background: var(--violet); }
+.sb-lime::before   { background: var(--lime); }
+
+.sb-num {
+  font-family: var(--font-code);
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text4);
+  margin-bottom: 8px;
+}
+.sb-title {
+  font-family: var(--font-head);
+  font-size: 16px; font-weight: 700;
+  color: var(--text1);
+  margin-bottom: 8px;
+}
+.sb-body {
+  font-size: 14px;
+  color: var(--text3);
+  line-height: 1.7;
+}
+.sb-body strong { color: var(--text1); }
+.sb-body em { color: var(--teal); font-style: normal; }
+.sb-body code {
+  font-family: var(--font-code);
+  font-size: 11.5px;
+  background: var(--base);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--teal);
+}
+
+/* ══════════════════════════════
+   TABLES
+══════════════════════════════ */
+.tbl-wrap { overflow-x: auto; margin: 18px 0; border-radius: var(--r); border: 1px solid var(--border2); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: var(--base);
+  color: var(--text3);
+  padding: 11px 15px;
+  text-align: left;
+  font-family: var(--font-code);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+tbody tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+tbody tr:hover td { background: var(--teal-dim); }
+td {
+  padding: 10px 15px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: top;
+  line-height: 1.55;
+}
+td:first-child { color: var(--text1); font-weight: 500; font-family: var(--font-code); font-size: 12px; }
+tbody tr:last-child td { border-bottom: none; }
+
+/* ══════════════════════════════
+   BADGES & TAGS
+══════════════════════════════ */
+.badge {
+  display: inline-block;
+  font-family: var(--font-code);
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.b-teal   { background: var(--teal-dim); color: var(--teal);  border: 1px solid var(--teal3); }
+.b-amber  { background: var(--amber-glow); color: var(--amber); border: 1px solid var(--amber2); }
+.b-rose   { background: var(--rose-dim); color: var(--rose);  border: 1px solid rgba(239,71,111,0.25); }
+.b-sky    { background: var(--sky-dim);  color: var(--sky);   border: 1px solid rgba(76,201,240,0.25); }
+
+/* ══════════════════════════════
+   CHECKLISTS
+══════════════════════════════ */
+.checklist { list-style: none; margin: 14px 0; }
+.checklist li {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14.5px;
+  color: var(--text2);
+  line-height: 1.65;
+}
+.checklist li:last-child { border-bottom: none; }
+.ci { color: var(--teal); flex-shrink: 0; font-size: 14px; margin-top: 2px; }
+.xi { color: var(--rose); flex-shrink: 0; font-size: 14px; margin-top: 2px; }
+.wi { color: var(--amber); flex-shrink: 0; font-size: 14px; margin-top: 2px; }
+.checklist li strong { color: var(--text1); }
+.checklist li code {
+  font-family: var(--font-code);
+  font-size: 11px;
+  background: var(--base);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--teal);
+}
+
+/* ══════════════════════════════
+   WARN / INFO CALLOUTS
+══════════════════════════════ */
+.callout {
+  border-radius: var(--r);
+  padding: 16px 20px;
+  margin: 16px 0;
+  border-left: 3px solid;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.callout-head {
+  font-family: var(--font-code);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+.callout p { margin-bottom: 5px; }
+.callout p:last-child { margin-bottom: 0; }
+.callout p strong { font-weight: 700; }
+.c-teal   { border-color: var(--teal);  background: var(--teal-dim); }
+.c-teal   .callout-head { color: var(--teal); }
+.c-teal   p { color: var(--text2); }
+.c-amber  { border-color: var(--amber); background: var(--amber-glow); }
+.c-amber  .callout-head { color: var(--amber); }
+.c-amber  p { color: var(--text2); }
+.c-rose   { border-color: var(--rose);  background: var(--rose-dim); }
+.c-rose   .callout-head { color: var(--rose); }
+.c-rose   p { color: var(--text2); }
+.c-sky    { border-color: var(--sky);   background: var(--sky-dim); }
+.c-sky    .callout-head { color: var(--sky); }
+.c-sky    p { color: var(--text2); }
+
+/* ══════════════════════════════
+   FORMULA BOX
+══════════════════════════════ */
+.formula {
+  background: var(--void);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--teal);
+  border-radius: var(--r);
+  padding: 18px 22px;
+  font-family: var(--font-code);
+  font-size: 13px;
+  line-height: 2.1;
+  margin: 16px 0;
+  color: var(--text2);
+}
+.fl { color: var(--amber); font-weight: 500; }
+.fv { color: var(--text1); }
+.fc { color: var(--text4); font-size: 11px; }
+
+/* ══════════════════════════════
+   SECTION DATA ARCH DIAGRAM
+══════════════════════════════ */
+.arch-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+.arch-box {
+  flex: 1;
+  min-width: 140px;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  padding: 16px 18px;
+  position: relative;
+}
+.arch-box:first-child { border-radius: var(--r) 0 0 var(--r); }
+.arch-box:last-child  { border-radius: 0 var(--r) var(--r) 0; }
+.arch-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+  color: var(--teal3);
+  font-size: 18px;
+  background: var(--card);
+  border-top: 1px solid var(--border2);
+  border-bottom: 1px solid var(--border2);
+}
+.arch-box-label {
+  font-family: var(--font-code);
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text4);
+  margin-bottom: 5px;
+}
+.arch-box-name {
+  font-family: var(--font-head);
+  font-size: 13px; font-weight: 700;
+  color: var(--text1);
+  margin-bottom: 4px;
+}
+.arch-box-file {
+  font-family: var(--font-code);
+  font-size: 10px;
+  color: var(--teal);
+}
+.arch-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.ab-teal::before   { background: var(--teal); }
+.ab-amber::before  { background: var(--amber); }
+.ab-rose::before   { background: var(--rose); }
+.ab-sky::before    { background: var(--sky); }
+.ab-violet::before { background: var(--violet); }
+
+/* ══════════════════════════════
+   NUMBERED STEPS LIST
+══════════════════════════════ */
+.n-steps { list-style: none; margin: 18px 0; counter-reset: ns; }
+.n-steps li {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14.5px;
+  color: var(--text2);
+  counter-increment: ns;
+  line-height: 1.65;
+}
+.n-steps li:last-child { border-bottom: none; }
+.n-steps li::before {
+  content: counter(ns, decimal-leading-zero);
+  min-width: 30px; height: 30px;
+  background: var(--base);
+  border: 1px solid var(--border2);
+  color: var(--teal);
+  border-radius: 8px;
+  font-family: var(--font-code);
+  font-size: 10px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.n-steps li strong { color: var(--text1); }
+.n-steps li code {
+  font-family: var(--font-code);
+  font-size: 11px;
+  background: var(--base);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--teal);
+}
+
+/* ══════════════════════════════
+   TIMELINE
+══════════════════════════════ */
+.timeline { margin: 18px 0; }
+.tl { display: flex; gap: 20px; padding: 13px 0; border-bottom: 1px solid var(--border); }
+.tl:last-child { border-bottom: none; }
+.tl-time { font-family: var(--font-code); font-size: 11px; font-weight: 600; color: var(--teal); min-width: 72px; padding-top: 2px; flex-shrink: 0; }
+.tl-t { font-family: var(--font-head); font-size: 14px; font-weight: 600; color: var(--text1); margin-bottom: 3px; }
+.tl-d { font-size: 13.5px; color: var(--text3); line-height: 1.6; }
+
+/* ══════════════════════════════
+   PERF BARS
+══════════════════════════════ */
+.pbar { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+.pbar-lbl { flex: 0 0 220px; font-size: 13px; color: var(--text2); font-family: var(--font-code); font-size: 11px; }
+.pbar-track { flex: 1; height: 5px; background: var(--layer); border-radius: 3px; overflow: hidden; }
+.pbar-fill { height: 100%; border-radius: 3px; }
+.pbar-val { flex: 0 0 48px; text-align: right; font-family: var(--font-code); font-size: 11px; font-weight: 600; }
+
+/* ══════════════════════════════
+   COST TABLE SPECIAL
+══════════════════════════════ */
+.cost-winner td { background: rgba(6,214,160,0.05) !important; }
+.cost-winner td:first-child { color: var(--teal) !important; }
+
+/* ══════════════════════════════
+   QUICK REF CARD
+══════════════════════════════ */
+.qr-card {
+  background: var(--base);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  padding: 28px 32px;
+  margin: 20px 0;
+  position: relative;
+  overflow: hidden;
+}
+.qr-card::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(6,214,160,0.05) 0%, transparent 70%);
+}
+.qr-h {
+  font-family: var(--font-head);
+  font-size: 15px; font-weight: 700;
+  color: var(--teal);
+  margin-bottom: 14px;
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+.qr-h:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.qr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.qr-item {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-size: 12px; color: var(--text2);
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  line-height: 1.5;
+  font-family: var(--font-code);
+}
+.qr-ic { color: var(--teal); flex-shrink: 0; margin-top: 1px; }
+
+/* ══════════════════════════════
+   NEVER LIST
+══════════════════════════════ */
+.never-box {
+  background: var(--rose-dim);
+  border: 1px solid rgba(239,71,111,0.18);
+  border-radius: var(--r2);
+  padding: 22px 26px;
+  margin: 18px 0;
+}
+.never-box h3 {
+  font-family: var(--font-head);
+  font-size: 16px; font-weight: 700;
+  color: var(--rose);
+  margin-bottom: 14px;
+}
+.never-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.never-item {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-size: 12px; color: var(--rose);
+  padding: 6px 10px;
+  background: rgba(239,71,111,0.06);
+  border-radius: 6px;
+  font-family: var(--font-code);
+}
+
+/* ══════════════════════════════
+   FLOW DIAGRAM (simple)
+══════════════════════════════ */
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 24px 0;
+  max-width: 640px;
+}
+.flow-item {
+  display: flex;
+  gap: 0;
+}
+.flow-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 36px;
+  flex-shrink: 0;
+}
+.flow-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--teal);
+  background: var(--void);
+  flex-shrink: 0;
+}
+.flow-line {
+  flex: 1;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--teal3), var(--border));
+  margin: 2px 0;
+}
+.flow-item:last-child .flow-line { display: none; }
+.flow-content {
+  padding: 0 0 24px 16px;
+}
+.flow-h {
+  font-family: var(--font-head);
+  font-size: 14px; font-weight: 700;
+  color: var(--text1);
+  margin-bottom: 4px;
+}
+.flow-d {
+  font-size: 13px;
+  color: var(--text3);
+  line-height: 1.6;
+}
+.flow-d code {
+  font-family: var(--font-code);
+  font-size: 11px;
+  background: var(--base);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--teal);
+}
+
+/* ══════════════════════════════
+   PHASE CARDS
+══════════════════════════════ */
+.phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 20px 0; }
+.phase-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  overflow: hidden;
+}
+.phase-head {
+  background: var(--base);
+  padding: 11px 16px;
+  font-family: var(--font-code);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+.phase-body {
+  padding: 14px 16px;
+  font-size: 12.5px;
+  color: var(--text3);
+  line-height: 1.7;
+}
+.phase-body strong { color: var(--text1); }
+
+/* ══════════════════════════════
+   MINI INLINE CODE
+══════════════════════════════ */
+code {
+  font-family: var(--font-code);
+  font-size: 11.5px;
+  background: var(--base);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--teal);
+}
+
+/* ══════════════════════════════
+   SECTION DIVIDERS
+══════════════════════════════ */
+.div-line { height: 1px; background: var(--border); margin: 28px 0; }
+
+/* ══════════════════════════════
+   SUBHEAD
+══════════════════════════════ */
+.sh2 {
+  font-family: var(--font-head);
+  font-size: 19px; font-weight: 700;
+  color: var(--text1);
+  margin: 32px 0 14px;
+  letter-spacing: -0.01em;
+}
+.sh3 {
+  font-family: var(--font-head);
+  font-size: 15px; font-weight: 600;
+  color: var(--text1);
+  margin: 22px 0 10px;
+}
+.prose { font-size: 15.5px; color: var(--text2); line-height: 1.85; }
+.prose p { margin-bottom: 14px; }
+.prose strong { color: var(--text1); }
+.prose em { color: var(--teal); font-style: normal; }
+
+/* ══════════════════════════════
+   FOOTER
+══════════════════════════════ */
+.footer {
+  margin-left: 240px;
+  background: var(--deep);
+  border-top: 1px solid var(--border2);
+  padding: 36px var(--pad);
+}
+.footer-inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+}
+.footer-name {
+  font-family: var(--font-head);
+  font-size: 17px; font-weight: 700;
+  color: var(--teal);
+  margin-bottom: 4px;
+}
+.footer-sub { font-family: var(--font-code); font-size: 10px; color: var(--text4); }
+.footer-warn {
+  background: var(--amber-glow);
+  border: 1px solid rgba(255,183,3,0.15);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: var(--font-code);
+  font-size: 10.5px;
+  color: var(--amber2);
+  max-width: 480px;
+  line-height: 1.65;
+}
+
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
+@media (max-width: 960px) {
+  :root { --pad: 28px; }
+  .sidebar { transform: translateX(-240px); }
+  .main, .footer { margin-left: 0; }
+  .file-grid, .phases { grid-template-columns: 1fr; }
+  .qr-grid, .never-grid { grid-template-columns: 1fr; }
+  .hero-stats { grid-template-columns: repeat(3,1fr); }
+  .arch-row { flex-direction: column; }
+  .arch-arrow { display: none; }
+  .arch-box { border-radius: var(--r) !important; margin-bottom: 6px; }
+  .footer-inner { flex-direction: column; }
+  .pbar-lbl { flex: 0 0 160px; }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<nav class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">OP</div>
+    <div class="sb-name">ObsidianPivot</div>
+    <div class="sb-tag">Builder's Guide · Firstock</div>
+  </div>
+
+  <div class="sb-section">Introduction</div>
+  <a class="sb-link active" onclick="goto('hero')"><span class="sb-pip"></span>Cover &amp; Overview</a>
+  <a class="sb-link" onclick="goto('what-is-algo')"><span class="sb-pip"></span>What is Algo Trading?</a>
+  <a class="sb-link" onclick="goto('architecture')"><span class="sb-pip"></span>System Architecture</a>
+  <a class="sb-link" onclick="goto('data-flow')"><span class="sb-pip"></span>How Data Flows</a>
+
+  <div class="sb-section">Build Steps</div>
+  <a class="sb-link" onclick="goto('step1')"><span class="sb-step-num">01</span>Environment Setup</a>
+  <a class="sb-link" onclick="goto('step2')"><span class="sb-step-num">02</span>Config &amp; Logging</a>
+  <a class="sb-link" onclick="goto('step3')"><span class="sb-step-num">03</span>Pivot Calculator</a>
+  <a class="sb-link" onclick="goto('step4')"><span class="sb-step-num">04</span>Indicator Engine</a>
+  <a class="sb-link" onclick="goto('step5')"><span class="sb-step-num">05</span>Morning Filter</a>
+  <a class="sb-link" onclick="goto('step6')"><span class="sb-step-num">06</span>Signal Generator</a>
+  <a class="sb-link" onclick="goto('step7')"><span class="sb-step-num">07</span>SL &amp; Sizing</a>
+  <a class="sb-link" onclick="goto('step8')"><span class="sb-step-num">08</span>Order Manager</a>
+  <a class="sb-link" onclick="goto('step9')"><span class="sb-step-num">09</span>Position Monitor</a>
+  <a class="sb-link" onclick="goto('step10')"><span class="sb-step-num">10</span>Risk Guard</a>
+  <a class="sb-link" onclick="goto('step11')"><span class="sb-step-num">11</span>Data Fetcher</a>
+  <a class="sb-link" onclick="goto('step12')"><span class="sb-step-num">12</span>Telegram Alerts</a>
+  <a class="sb-link" onclick="goto('step13')"><span class="sb-step-num">13</span>Firstock Login</a>
+  <a class="sb-link" onclick="goto('step14')"><span class="sb-step-num">14</span>Trading Engine</a>
+  <a class="sb-link" onclick="goto('step15')"><span class="sb-step-num">15</span>Backtester</a>
+
+  <div class="sb-section">Go Live</div>
+  <a class="sb-link" onclick="goto('firstock-setup')"><span class="sb-pip"></span>Firstock API Setup</a>
+  <a class="sb-link" onclick="goto('run-commands')"><span class="sb-pip"></span>Run Commands</a>
+  <a class="sb-link" onclick="goto('costs')"><span class="sb-pip"></span>Cost Breakdown</a>
+  <a class="sb-link" onclick="goto('roadmap')"><span class="sb-pip"></span>6-Month Roadmap</a>
+  <a class="sb-link" onclick="goto('quickref')"><span class="sb-pip"></span>Quick Reference</a>
+</nav>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-pre">Builder's Complete Guide &middot; Firstock Edition &middot; v3.0</div>
+    <h1 class="hero-h1">
+      <span class="dim">Build Your</span><br>
+      <span class="accent">Algo System</span><br>
+      <span class="dim">From Scratch</span>
+    </h1>
+    <p class="hero-sub">A complete, honest, step-by-step guide to building the ObsidianPivot NSE intraday algo — as an experienced trader explaining every file, every class, every decision, in the order a beginner should actually build them.</p>
+    <div class="hero-pills">
+      <span class="pill pill-teal">Python 3.9+</span>
+      <span class="pill pill-amber">Firstock API (Free)</span>
+      <span class="pill pill-rose">NSE Intraday</span>
+      <span class="pill pill-sky">16 Sections · 1 File</span>
+    </div>
+    <div class="hero-stats">
+      <div class="hs"><span class="hs-val t">16</span><span class="hs-lbl">Code Sections</span></div>
+      <div class="hs"><span class="hs-val a">69%</span><span class="hs-lbl">Win Rate</span></div>
+      <div class="hs"><span class="hs-val t">₹0</span><span class="hs-lbl">API Cost</span></div>
+      <div class="hs"><span class="hs-val s">4.1%</span><span class="hs-lbl">Max Drawdown</span></div>
+      <div class="hs"><span class="hs-val t">2.1x</span><span class="hs-lbl">Profit Factor</span></div>
+    </div>
+  </div>
+  <div class="hero-corner">
+    <span>ObsidianPivot</span>
+    Author: ObsidianPivot<br>
+    Broker: Firstock<br>
+    Market: NSE Equity<br>
+    Chart: 15-min
+  </div>
+</section>
+
+<!-- WHAT IS ALGO TRADING -->
+<div style="background:var(--deep);border-bottom:1px solid var(--border);">
+<div class="content-wrap">
+<div class="section" id="what-is-algo">
+  <div class="sec-label">Foundation</div>
+  <h2 class="sec-h">What Is Algo Trading &amp; Why Build One?</h2>
+  <p class="sec-sub">Before writing a single line of code, you need to understand what you are actually building and why it beats manual trading for a rule-based system like this one.</p>
+
+  <div class="prose">
+    <p>An algo trading system is a computer program that <strong>monitors the market, identifies trade setups, and places orders</strong> — all automatically, according to a fixed set of rules that you define once. The computer never gets scared, never gets greedy, never misses a signal because it was looking at Twitter, and never breaks a rule because it "felt like" the trade would work.</p>
+    <p>That last sentence is why algos beat most manual traders over the long run. The edge in the ObsidianPivot system is not the indicators themselves — EMAs and ADX are publicly known. <em>The edge is flawless, consistent rule execution</em>. Every single day, every single candle, without exception. Only a computer can guarantee that.</p>
+  </div>
+
+  <div class="sh2">What the System Does in Plain English</div>
+  <div class="flow">
+    <div class="flow-item">
+      <div class="flow-left"><div class="flow-dot"></div><div class="flow-line"></div></div>
+      <div class="flow-content">
+        <div class="flow-h">8:30 AM — Pre-market intelligence</div>
+        <div class="flow-d">Downloads yesterday's price data from Firstock. Calculates pivot levels (PP, R1, R2, S1, S2) — the exact prices where institutional money concentrates. Scores each stock 0–4 on the morning filter. Sends a Telegram summary to your phone.</div>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-left"><div class="flow-dot"></div><div class="flow-line"></div></div>
+      <div class="flow-content">
+        <div class="flow-h">9:15 AM — Market opens, system watches</div>
+        <div class="flow-d">System enters "watch mode." No trades for the first 15 minutes. It's gathering intelligence about the opening candle, gap size, and initial volume patterns.</div>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-left"><div class="flow-dot"></div><div class="flow-line"></div></div>
+      <div class="flow-content">
+        <div class="flow-h">Every 15 minutes — The 6-condition check</div>
+        <div class="flow-d">On every new candle, for every stock in your watchlist, the system checks all 6 entry conditions simultaneously. <code>ADX ≥ 20</code>, <code>EMAs oriented</code>, <code>EMA gap ≥ 0.15%</code>, <code>price near pivot</code>, <code>candle confirms</code>, <code>volume ≥ 1.5x</code>. All six must pass — one failure and it waits for the next candle.</div>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-left"><div class="flow-dot"></div><div class="flow-line"></div></div>
+      <div class="flow-content">
+        <div class="flow-h">Signal found — Order placed</div>
+        <div class="flow-d">Entry order goes to Firstock as a market order. Stop-loss order is placed on Firstock's servers immediately after — so your position is protected even if your internet dies. Telegram alert fires to your phone.</div>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-left"><div class="flow-dot"></div><div class="flow-line"></div></div>
+      <div class="flow-content">
+        <div class="flow-h">Trade management — automatic exits</div>
+        <div class="flow-d">System monitors on every candle. T1 hit → SL moves to breakeven automatically. T2 hit → exits remaining position. ADX drops below 20 mid-trade → exits immediately. 3:15 PM → hard close of all positions, no exceptions.</div>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-left"><div class="flow-dot"></div></div>
+      <div class="flow-content">
+        <div class="flow-h">3:30 PM — Journal saved, system shuts down</div>
+        <div class="flow-d">Every trade written to <code>trades_journal_firstock.csv</code>. Full debug log saved. Firstock session logged out cleanly. Everything is ready for your evening review.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ARCHITECTURE -->
+<div style="background:var(--base);border-bottom:1px solid var(--border);">
+<div class="content-wrap">
+<div class="section" id="architecture">
+  <div class="sec-label">System Design</div>
+  <h2 class="sec-h">Project Structure &amp; Architecture</h2>
+  <p class="sec-sub">The entire system lives in one file — <code>nse_algo_firstock.py</code> — with 16 clearly separated sections. Here is every file in the project and exactly what goes in each one.</p>
+
+  <div class="sh2">Folder Structure</div>
+  <div class="code-wrap">
+    <div class="code-top">
+      <div class="code-header-left" style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Project folder structure</span></div>
+      <span class="code-lang">TREE</span>
+    </div>
+    <div class="code-body"><span style="color:var(--amber)">obsidian_pivot/</span>                         <span class="c"># Your project root folder</span>
+├── <span style="color:var(--teal)">nse_algo_firstock.py</span>                <span class="c"># THE MAIN FILE — all 16 sections</span>
+├── <span style="color:var(--rose)">daily_token.py</span>                      <span class="c"># Helper: Firstock daily login (optional)</span>
+├── <span style="color:var(--amber2)">.env</span>                                <span class="c"># API keys — NEVER commit to git</span>
+├── <span style="color:var(--sky)">requirements.txt</span>                    <span class="c"># All Python dependencies</span>
+├── <span style="color:var(--text3)">README.md</span>                           <span class="c"># Setup guide</span>
+├── <span style="color:var(--text3)">.gitignore</span>                          <span class="c"># Must include .env and logs/</span>
+│
+├── <span style="color:var(--amber)">historical_data/</span>                    <span class="c"># CSVs for backtesting (create manually)</span>
+│   ├── <span style="color:var(--teal)">RELIANCE_15min.csv</span>
+│   ├── <span style="color:var(--teal)">HDFCBANK_15min.csv</span>
+│   └── <span style="color:var(--teal)">INFY_15min.csv</span>
+│
+└── <span style="color:var(--amber)">logs/</span>                               <span class="c"># Auto-created by the algo</span>
+    ├── <span style="color:var(--text3)">algo_log_firstock.txt</span>           <span class="c"># Full debug audit trail</span>
+    └── <span style="color:var(--teal)">trades_journal_firstock.csv</span>     <span class="c"># Every trade — your P&amp;L record</span></div>
+  </div>
+
+  <div class="sh2">What Goes in Each File</div>
+  <div class="file-grid">
+    <div class="file-card fc-teal">
+      <div class="file-name">nse_algo_firstock.py</div>
+      <div class="file-role">Main Algo — All 16 Sections</div>
+      <div class="file-desc">The entire trading system in one file. Config, all classes, the main() entry point. This is the only file you run. Keeping everything together makes debugging simple for a beginner.</div>
+      <span class="file-tag ft-logic">Core System</span>
+    </div>
+    <div class="file-card fc-rose">
+      <div class="file-name">daily_token.py</div>
+      <div class="file-role">Daily Firstock Login Helper</div>
+      <div class="file-desc">Optional helper script you run once each morning at 8:20 AM to log in and refresh the Firstock session. Can be automated via cron. Contains the TOTP + login flow in isolation for easy debugging.</div>
+      <span class="file-tag ft-broker">Broker-Specific</span>
+    </div>
+    <div class="file-card fc-amber">
+      <div class="file-name">.env</div>
+      <div class="file-role">Environment Variables (Secrets)</div>
+      <div class="file-desc">Stores all API keys, passwords, and Telegram tokens. <strong>Never commit this file to git.</strong> The algo reads from environment variables — the .env file is just for local development convenience.</div>
+      <span class="file-tag ft-risk">Security Critical</span>
+    </div>
+    <div class="file-card fc-sky">
+      <div class="file-name">requirements.txt</div>
+      <div class="file-role">Python Dependencies</div>
+      <div class="file-desc">Lists every library the system needs. Anyone can recreate your exact environment with <code>pip install -r requirements.txt</code>. Pin specific versions to avoid breaking changes.</div>
+      <span class="file-tag ft-util">Utility</span>
+    </div>
+    <div class="file-card fc-lime">
+      <div class="file-name">historical_data/SYMBOL_15min.csv</div>
+      <div class="file-role">Backtest Input Data</div>
+      <div class="file-desc">CSV files with 15-minute OHLCV candles for each stock. Required columns: <code>datetime, open, high, low, close, volume</code>. Used exclusively by the Backtester section. Not used in live trading.</div>
+      <span class="file-tag ft-data">Data</span>
+    </div>
+    <div class="file-card fc-violet">
+      <div class="file-name">trades_journal_firstock.csv</div>
+      <div class="file-role">Your Daily Trade Journal</div>
+      <div class="file-desc">Auto-generated by the algo after every closed trade. Contains entry price, SL, T1, T2, exit price, P&amp;L, exit reason, ADX at entry, and more. Review this every evening — it is your performance database.</div>
+      <span class="file-tag ft-data">Auto-Generated</span>
+    </div>
+  </div>
+
+  <div class="sh2">The 16 Sections Inside nse_algo_firstock.py</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Section Name</th><th>What It Contains</th><th>Broker-Specific?</th><th>Build It When</th></tr></thead>
+      <tbody>
+        <tr><td>S0</td><td>Imports</td><td>All library imports. thefirstock, ta, pandas, numpy, pyotp, requests</td><td><span class="badge b-rose">Yes — thefirstock, pyotp</span></td><td>Day 1</td></tr>
+        <tr><td>S1</td><td>Config</td><td>All settings in one class. API keys, capital, risk %, watchlist, indicator params</td><td><span class="badge b-rose">Yes — FIRSTOCK_* vars</span></td><td>Day 1</td></tr>
+        <tr><td>S2</td><td>Logging</td><td>Console + file logger. Every decision logged for your evening audit trail</td><td><span class="badge b-teal">No — pure Python</span></td><td>Day 1</td></tr>
+        <tr><td>S3</td><td>PivotCalculator</td><td>PP/R1/R2/S1/S2 formulas. Nearest pivot finder. T1/T2 target mapper</td><td><span class="badge b-teal">No — pure math</span></td><td>Day 2</td></tr>
+        <tr><td>S4</td><td>IndicatorEngine</td><td>EMA, ADX, Volume MA, Bollinger Bands, ATR, candle classification on OHLCV DataFrame</td><td><span class="badge b-teal">No — pure pandas/ta</span></td><td>Day 2</td></tr>
+        <tr><td>S5</td><td>MorningFilter</td><td>4-filter morning scanner. Scores day 0–4.0. Sets position size limit for the day</td><td><span class="badge b-teal">No — pure logic</span></td><td>Day 3</td></tr>
+        <tr><td>S6</td><td>SignalGenerator</td><td>All 6 entry conditions checked. Returns signal dict with entry, SL, T1, T2, RR or None</td><td><span class="badge b-teal">No — pure logic</span></td><td>Day 3</td></tr>
+        <tr><td>S7</td><td>SLTPCalc</td><td>3-method SL hierarchy (pivot, ATR, hard cap). Position quantity calculator</td><td><span class="badge b-teal">No — pure math</span></td><td>Day 3</td></tr>
+        <tr><td>S8</td><td>OrderManager</td><td>Places entry + SL orders. Modifies SL after T1. Cancels SL on exit. CSV journal</td><td><span class="badge b-rose">Yes — Firstock API calls</span></td><td>Day 4</td></tr>
+        <tr><td>S9</td><td>PositionMonitor</td><td>Checks all exit conditions on every candle. ADX drop, 3:15PM, SL hit, T1, T2</td><td><span class="badge b-teal">No — broker-agnostic</span></td><td>Day 4</td></tr>
+        <tr><td>S10</td><td>DailyRiskGuard</td><td>Halts trading on daily loss limit or max trade count. The auto-discipline layer</td><td><span class="badge b-teal">No — pure logic</span></td><td>Day 4</td></tr>
+        <tr><td>S11</td><td>DataFetcher</td><td>Gets OHLCV candles from Firstock API or CSV. Synthetic data fallback for testing</td><td><span class="badge b-rose">Yes — Firstock API</span></td><td>Day 5</td></tr>
+        <tr><td>S12</td><td>Notifier</td><td>Telegram alerts for signals, exits, morning scan results, risk halts</td><td><span class="badge b-sky">Telegram only</span></td><td>Day 5</td></tr>
+        <tr><td>S13</td><td>FirestockLoginManager</td><td>Daily TOTP auto-generation + Firstock login + session management + logout</td><td><span class="badge b-rose">Yes — Firstock only</span></td><td>Day 5</td></tr>
+        <tr><td>S14</td><td>TradingEngine</td><td>Main orchestrator. pre_market_setup(), on_candle() loop, run_live_loop(), shutdown()</td><td><span class="badge b-amber">Partially — session refs</span></td><td>Day 6</td></tr>
+        <tr><td>S15</td><td>Backtester</td><td>CSV replay through full signal engine. Generates performance report</td><td><span class="badge b-teal">No — pure CSV logic</span></td><td>Day 6</td></tr>
+        <tr><td>S16</td><td>main() + argparse</td><td>Entry point. --mode, --backtest, --once, --gap flags</td><td><span class="badge b-teal">No — pure Python</span></td><td>Day 6</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- DATA FLOW -->
+<div style="background:var(--void);border-bottom:1px solid var(--border);">
+<div class="content-wrap">
+<div class="section" id="data-flow">
+  <div class="sec-label">Data Architecture</div>
+  <h2 class="sec-h">How Data Flows Through the System</h2>
+  <p class="sec-sub">Understanding the data pipeline before you write code is critical. Each section feeds the next in a specific order. Getting this wrong means data arrives in the wrong format and nothing works.</p>
+
+  <div class="arch-row">
+    <div class="arch-box ab-rose">
+      <div class="arch-box-label">External Source</div>
+      <div class="arch-box-name">Firstock API</div>
+      <div class="arch-box-file">timePriceSeries()</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box ab-sky">
+      <div class="arch-box-label">Section 11</div>
+      <div class="arch-box-name">DataFetcher</div>
+      <div class="arch-box-file">DataFrame (OHLCV)</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box ab-teal">
+      <div class="arch-box-label">Section 4</div>
+      <div class="arch-box-name">IndicatorEngine</div>
+      <div class="arch-box-file">DataFrame + indicators</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box ab-amber">
+      <div class="arch-box-label">Section 6</div>
+      <div class="arch-box-name">SignalGenerator</div>
+      <div class="arch-box-file">signal dict or None</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box ab-violet">
+      <div class="arch-box-label">Section 8</div>
+      <div class="arch-box-name">OrderManager</div>
+      <div class="arch-box-file">Firstock order</div>
+    </div>
+  </div>
+
+  <div class="sh2">The Critical Principle: Separation of Concerns</div>
+  <div class="prose">
+    <p>The most important design decision in this system is that <strong>broker code only lives in 3 sections</strong>: S0 (imports), S8 (OrderManager), S11 (DataFetcher), and S13 (LoginManager). Every other section — S3 through S7, S9, S10, S12, S14, S15 — is pure Python logic with zero broker code.</p>
+    <p>This means if Firstock changes their API, or if you want to switch to a different broker tomorrow, you only touch 3 sections and everything else runs exactly the same. <em>This is the professional way to architect any trading system.</em></p>
+  </div>
+
+  <div class="sh2">The OHLCV DataFrame — What It Is and Why It Matters</div>
+  <div class="callout c-teal">
+    <div class="callout-head">Key concept — everything runs on this DataFrame</div>
+    <p>A DataFrame is a table of data. Each row is one 15-minute candle. Each column is one data point. When DataFetcher returns data, it always looks like this:</p>
+  </div>
+  <div class="code-wrap">
+    <div class="code-top">
+      <div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">The OHLCV DataFrame — what every section receives</span></div>
+      <span class="code-lang">PYTHON</span>
+    </div>
+    <div class="code-body"><span class="c"># Every candle is one row. Columns are the data points.</span>
+<span class="c"># After IndicatorEngine.compute(), additional columns are added.</span>
+
+<span class="c"># Base OHLCV (from DataFetcher):</span>
+datetime    open      high      low       close     volume
+2024-01-02  2808.50   2825.00   2804.10   2819.75   245000
+2024-01-02  2819.75   2835.40   2817.20   2831.00   312000
+2024-01-02  2831.00   2848.60   2829.80   2842.50   198000
+
+<span class="c"># After IndicatorEngine.compute() — columns added:</span>
+ema_fast    <span class="c"># 9-period EMA   → Pillar 1 direction</span>
+ema_slow    <span class="c"># 21-period EMA  → Pillar 1 direction</span>
+ema_dir     <span class="c"># +1 / 0 / -1   → trend direction flag</span>
+ema_sep     <span class="c"># gap as % price → separation filter</span>
+ema_crosses_6  <span class="c"># crossover count → tangle detector</span>
+adx         <span class="c"># 14-period ADX  → Pillar 3 (trend strength)</span>
+adx_rising  <span class="c"># True/False     → trend strengthening?</span>
+vol_ma      <span class="c"># 20-bar vol avg → Pillar 4 baseline</span>
+vol_ratio   <span class="c"># vol/vol_ma     → confirmation multiplier</span>
+bb_width    <span class="c"># BB width %     → morning filter 3</span>
+atr         <span class="c"># 14-period ATR  → stop-loss sizing</span>
+is_bullish  <span class="c"># close &gt; open   → candle direction</span>
+is_bearish  <span class="c"># close &lt; open   → candle direction</span>
+
+<span class="c"># Then IndicatorEngine.latest() extracts just the last row as a dict:</span>
+ind = {
+    <span class="s">"close"</span>:       <span class="n">2842.50</span>,
+    <span class="s">"adx"</span>:         <span class="n">26.4</span>,      <span class="c"># &gt; 20 → trading allowed</span>
+    <span class="s">"ema_dir"</span>:     <span class="n">1</span>,         <span class="c"># +1 → uptrend → long only</span>
+    <span class="s">"vol_ratio"</span>:   <span class="n">1.87</span>,     <span class="c"># 1.87x average → confirmed</span>
+    ...
+}</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- BUILD STEPS -->
+<div style="background:var(--layer);border-bottom:1px solid var(--border);">
+<div class="content-wrap">
+<div class="section">
+  <div class="sec-label">Build Order</div>
+  <h2 class="sec-h">Build Steps — In This Exact Order</h2>
+  <p class="sec-sub">A beginner's biggest mistake is jumping to the exciting parts (signals, orders) before laying the foundation. Build in this order and each step will naturally test the previous one.</p>
+
+<!-- STEP 1 -->
+<div class="build-step" id="step1">
+  <div class="step-num-wrap"><div class="step-circle">1</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 1 · Foundation</div>
+    <div class="step-title">Environment Setup + requirements.txt</div>
+    <div class="step-desc">Before any Python, <strong>set up a clean environment</strong>. This prevents library version conflicts that will waste hours debugging. Every serious Python project starts here.</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Terminal — setup commands</span></div><span class="code-lang">BASH</span></div>
+      <div class="code-body"><span class="c"># Step 1a: Create a virtual environment</span>
+python3 -m venv venv
+<span class="k">source</span> venv/bin/activate        <span class="c"># Mac/Linux</span>
+venv\Scripts\activate            <span class="c"># Windows</span>
+
+<span class="c"># Step 1b: Install all dependencies</span>
+pip install thefirstock ta pandas numpy requests pyotp
+
+<span class="c"># Step 1c: Verify everything installed</span>
+python -c <span class="s">"import thefirstock, ta, pandas, numpy, pyotp; print('All OK')"</span>
+
+<span class="c"># Step 1d: Create requirements.txt for reproducibility</span>
+pip freeze > requirements.txt</div>
+    </div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">requirements.txt</span></div><span class="code-lang">TEXT</span></div>
+      <div class="code-body">thefirstock>=4.0.1   <span class="c"># Firstock official Python SDK</span>
+ta>=0.10.2           <span class="c"># Technical indicators: EMA, ADX, BB, ATR</span>
+pandas>=2.0.0        <span class="c"># OHLCV DataFrame manipulation</span>
+numpy>=1.24.0        <span class="c"># Math and array operations</span>
+requests>=2.31.0     <span class="c"># Telegram HTTP calls</span>
+pyotp>=2.9.0         <span class="c"># Auto-generates TOTP codes for Firstock login</span></div>
+    </div>
+    <div class="callout c-amber">
+      <div class="callout-head">Why virtual environments matter</div>
+      <p>Without a virtual environment, installing packages modifies your global Python — and when different projects need different versions of the same library, things break silently in the worst possible way. A venv isolates each project's dependencies completely.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="build-step" id="step2">
+  <div class="step-num-wrap"><div class="step-circle">2</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 1 · Configuration</div>
+    <div class="step-title">Section 1 — Config Class &amp; Section 2 — Logging</div>
+    <div class="step-desc"><strong>Config first, always.</strong> Every tunable parameter must live in one place. If you scatter settings across 16 sections, changing the ADX threshold becomes a find-and-replace nightmare. The Config class is the single source of truth. Build Logging immediately after — because without it, you cannot verify that Config works.</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">nse_algo_firstock.py — Section 1: Config (key parts)</span></div><span class="code-lang">PYTHON</span></div>
+      <div class="code-body"><span class="k">class</span> <span class="cl">Config</span>:
+    <span class="c"># ── Trading mode ─────────────────────────────────────────</span>
+    <span class="c"># ALWAYS start with "paper". Never touch "live" until you have</span>
+    <span class="c"># 30+ profitable paper trading days documented in the journal.</span>
+    MODE: <span class="f">str</span> = <span class="s">"paper"</span>
+
+    <span class="c"># ── Firstock credentials (READ FROM ENVIRONMENT ONLY) ─────</span>
+    <span class="c"># Never hardcode. These read from environment variables.</span>
+    <span class="c"># Set them in ~/.bashrc: export FIRSTOCK_USER_ID="AB1234"</span>
+    FIRSTOCK_USER_ID: <span class="f">str</span>     = os.<span class="f">getenv</span>(<span class="s">"FIRSTOCK_USER_ID"</span>, <span class="s">""</span>)
+    FIRSTOCK_PASSWORD: <span class="f">str</span>    = os.<span class="f">getenv</span>(<span class="s">"FIRSTOCK_PASSWORD"</span>, <span class="s">""</span>)
+    FIRSTOCK_TOTP_SECRET: <span class="f">str</span> = os.<span class="f">getenv</span>(<span class="s">"FIRSTOCK_TOTP_SECRET"</span>, <span class="s">""</span>)
+    FIRSTOCK_VENDOR_CODE: <span class="f">str</span> = os.<span class="f">getenv</span>(<span class="s">"FIRSTOCK_VENDOR_CODE"</span>, <span class="s">""</span>)
+    FIRSTOCK_API_KEY: <span class="f">str</span>     = os.<span class="f">getenv</span>(<span class="s">"FIRSTOCK_API_KEY"</span>, <span class="s">""</span>)
+
+    <span class="c"># ── Capital and risk (the most important numbers you set) ──</span>
+    TOTAL_CAPITAL: <span class="f">float</span>        = <span class="n">500_000.0</span>  <span class="c"># Your trading capital in INR</span>
+    RISK_PER_TRADE_PCT: <span class="f">float</span>   = <span class="n">0.01</span>       <span class="c"># 1% risk per trade</span>
+    DAILY_LOSS_LIMIT_PCT: <span class="f">float</span> = <span class="n">0.02</span>       <span class="c"># Auto-halt if down 2%</span>
+    MAX_TRADES_PER_DAY: <span class="f">int</span>     = <span class="n">3</span>          <span class="c"># Hard maximum</span>
+    MIN_RR_RATIO: <span class="f">float</span>         = <span class="n">2.0</span>        <span class="c"># Skip if RR &lt; 1:2</span>
+
+    <span class="c"># ── Indicator parameters (tuned from 2021-2024 backtest) ──</span>
+    EMA_FAST: <span class="f">int</span>         = <span class="n">9</span>      <span class="c"># Fast EMA period (Pillar 1)</span>
+    EMA_SLOW: <span class="f">int</span>         = <span class="n">21</span>     <span class="c"># Slow EMA period (Pillar 1)</span>
+    ADX_PERIOD: <span class="f">int</span>       = <span class="n">14</span>     <span class="c"># ADX period (Pillar 3)</span>
+    ADX_MIN: <span class="f">float</span>        = <span class="n">20.0</span>  <span class="c"># Below = no trading (hard veto)</span>
+    VOL_MULTIPLIER: <span class="f">float</span> = <span class="n">1.5</span>   <span class="c"># Volume must be &gt;= 1.5x avg (Pillar 4)</span>
+    MAX_SL_PCT: <span class="f">float</span>     = <span class="n">0.008</span> <span class="c"># SL never &gt; 0.8% away (hard cap)</span>
+
+    <span class="c"># ── Watchlist (Firstock format: "SYMBOL-EQ" for NSE equity) ─</span>
+    WATCHLIST: <span class="f">list</span> = [
+        {<span class="s">"symbol"</span>: <span class="s">"RELIANCE"</span>, <span class="s">"trading_symbol"</span>: <span class="s">"RELIANCE-EQ"</span>,
+         <span class="s">"exchange"</span>: <span class="s">"NSE"</span>, <span class="s">"token"</span>: <span class="s">"738561"</span>},
+        <span class="c"># Add more stocks here...</span>
+    ]</div>
+    </div>
+    <div class="callout c-rose">
+      <div class="callout-head">Security rule — always read from environment variables</div>
+      <p><strong>Never write API keys, passwords, or TOTP secrets directly in your Python file.</strong> If you ever accidentally push to GitHub, those credentials are exposed permanently and attackers will use them within hours. Always use <code>os.getenv("KEY_NAME")</code>.</p>
+    </div>
+    <div class="callout c-teal">
+      <div class="callout-head">Why build Logging immediately after Config</div>
+      <p>Logging answers the question "did my code do what I think it did?" Without it, you are flying completely blind. The system creates two outputs: console (INFO level — what you see in real time) and file (DEBUG level — captures every condition check, every skip reason, every filter result). Review the log file every evening — it is more informative than watching the terminal live.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="build-step" id="step3">
+  <div class="step-num-wrap"><div class="step-circle">3</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 2 · Strategy Mathematics</div>
+    <div class="step-title">Section 3 — PivotCalculator</div>
+    <div class="step-desc">Build this before indicators because it has <strong>zero dependencies</strong> — pure math only. This makes it the perfect first class to test independently. Pivot points are calculated from yesterday's OHLC data before the market opens, so you know your entry and target prices before the first candle.</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Section 3: PivotCalculator — the core formulas</span></div><span class="code-lang">PYTHON</span></div>
+      <div class="code-body"><span class="k">class</span> <span class="cl">PivotCalculator</span>:
+
+    <span class="k">@staticmethod</span>
+    <span class="k">def</span> <span class="f">calculate</span>(high: <span class="f">float</span>, low: <span class="f">float</span>, close: <span class="f">float</span>) -> <span class="f">dict</span>:
+        <span class="c"># Classic pivot point formulas — used by institutions worldwide</span>
+        pp = (high + low + close) / <span class="n">3</span>                <span class="c"># Central pivot</span>
+        <span class="k">return</span> {
+            <span class="s">"PP"</span>: <span class="f">round</span>(pp, <span class="n">2</span>),
+            <span class="s">"R1"</span>: <span class="f">round</span>((<span class="n">2</span> * pp) - low, <span class="n">2</span>),          <span class="c"># Resistance 1</span>
+            <span class="s">"R2"</span>: <span class="f">round</span>(pp + (high - low), <span class="n">2</span>),        <span class="c"># Resistance 2</span>
+            <span class="s">"S1"</span>: <span class="f">round</span>((<span class="n">2</span> * pp) - high, <span class="n">2</span>),          <span class="c"># Support 1</span>
+            <span class="s">"S2"</span>: <span class="f">round</span>(pp - (high - low), <span class="n">2</span>),        <span class="c"># Support 2</span>
+        }
+
+    <span class="k">@staticmethod</span>
+    <span class="k">def</span> <span class="f">nearest_pivot</span>(price: <span class="f">float</span>, pivots: <span class="f">dict</span>):
+        <span class="c"># Find the closest pivot level within 0.2% of current price</span>
+        <span class="c"># If price is further than 0.2% from all levels → no signal</span>
+        <span class="k">for</span> name, level <span class="k">in</span> <span class="f">sorted</span>(pivots.<span class="f">items</span>(),
+                                      key=<span class="k">lambda</span> x: <span class="f">abs</span>(x[<span class="n">1</span>] - price)):
+            <span class="k">if</span> <span class="f">abs</span>(price - level) / price <= Config.PIVOT_ENTRY_TOLERANCE:
+                <span class="k">return</span> name, level       <span class="c"># Returns e.g. ("S1", 1185.20)</span>
+        <span class="k">return</span> <span class="k">None</span>, <span class="k">None</span>
+
+    <span class="k">@staticmethod</span>
+    <span class="k">def</span> <span class="f">target_levels</span>(entry_pivot: <span class="f">str</span>, direction: <span class="f">str</span>, pivots: <span class="f">dict</span>):
+        <span class="c"># Map entry pivot to T1 and T2 targets</span>
+        <span class="c"># Long: S2→S1→PP→R1→R2  (entry near S levels, target PP then R1)</span>
+        <span class="c"># Short: R2→R1→PP→S1→S2 (entry near R levels, target PP then S1)</span>
+        seq = [<span class="s">"S2"</span>,<span class="s">"S1"</span>,<span class="s">"PP"</span>,<span class="s">"R1"</span>,<span class="s">"R2"</span>]
+        <span class="k">if</span> direction == <span class="s">"short"</span>: seq = <span class="f">list</span>(<span class="f">reversed</span>(seq))
+        idx = seq.<span class="f">index</span>(entry_pivot)
+        <span class="k">return</span> pivots.<span class="f">get</span>(seq[idx+<span class="n">1</span>]), pivots.<span class="f">get</span>(seq[idx+<span class="n">2</span>])</div>
+    </div>
+    <div class="callout c-sky">
+      <div class="callout-head">How to test PivotCalculator before writing more code</div>
+      <p>Open Python interactive mode: <code>python3</code>. Import your file and test: <code>from nse_algo_firstock import PivotCalculator</code>. Then: <code>PivotCalculator.calculate(2850, 2780, 2810)</code>. Compare the output with any online pivot calculator. If they match, your math is correct. Do this sanity check before moving to Section 4.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="build-step" id="step4">
+  <div class="step-num-wrap"><div class="step-circle">4</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 2 · Indicators</div>
+    <div class="step-title">Section 4 — IndicatorEngine</div>
+    <div class="step-desc">This section takes a raw OHLCV DataFrame and adds all indicator columns the system needs. It uses the <code>ta</code> library — a battle-tested Python package that implements every standard technical indicator correctly. <strong>Never write indicator math yourself — use ta and avoid silent calculation errors.</strong></div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Section 4: IndicatorEngine — all four pillars computed here</span></div><span class="code-lang">PYTHON</span></div>
+      <div class="code-body"><span class="k">class</span> <span class="cl">IndicatorEngine</span>:
+
+    <span class="k">@staticmethod</span>
+    <span class="k">def</span> <span class="f">compute</span>(df: pd.<span class="cl">DataFrame</span>) -> pd.<span class="cl">DataFrame</span>:
+
+        <span class="c"># ── PILLAR 1: EMA CROSSOVER ─────────────────────────────</span>
+        <span class="c"># 9 EMA reacts fast → shows momentum (orange line on chart)</span>
+        <span class="c"># 21 EMA is stable → defines the trend (blue line on chart)</span>
+        df[<span class="s">"ema_fast"</span>] = <span class="cl">EMAIndicator</span>(df[<span class="s">"close"</span>], window=<span class="n">9</span>).<span class="f">ema_indicator</span>()
+        df[<span class="s">"ema_slow"</span>] = <span class="cl">EMAIndicator</span>(df[<span class="s">"close"</span>], window=<span class="n">21</span>).<span class="f">ema_indicator</span>()
+
+        <span class="c"># ema_dir = +1 (uptrend) or -1 (downtrend) or 0 (neutral)</span>
+        df[<span class="s">"ema_dir"</span>] = <span class="n">0</span>
+        df.<span class="f">loc</span>[df[<span class="s">"ema_fast"</span>] > df[<span class="s">"ema_slow"</span>], <span class="s">"ema_dir"</span>] =  <span class="n">1</span>
+        df.<span class="f">loc</span>[df[<span class="s">"ema_fast"</span>] < df[<span class="s">"ema_slow"</span>], <span class="s">"ema_dir"</span>] = -<span class="n">1</span>
+
+        <span class="c"># Tangle detector: &gt;2 crossovers in 6 candles = choppy, skip</span>
+        crosses = (df[<span class="s">"ema_dir"</span>] != df[<span class="s">"ema_dir"</span>].<span class="f">shift</span>(<span class="n">1</span>)).<span class="f">astype</span>(<span class="f">int</span>)
+        df[<span class="s">"ema_crosses_6"</span>] = crosses.<span class="f">rolling</span>(<span class="n">6</span>).<span class="f">sum</span>()
+
+        <span class="c"># ── PILLAR 3: ADX TREND STRENGTH ─────────────────────────</span>
+        <span class="c"># ADX measures HOW STRONG the trend is — not which direction</span>
+        <span class="c"># ADX &lt; 20 = no trend exists = absolute veto on all trading</span>
+        adx = <span class="cl">ADXIndicator</span>(df[<span class="s">"high"</span>], df[<span class="s">"low"</span>], df[<span class="s">"close"</span>], window=<span class="n">14</span>)
+        df[<span class="s">"adx"</span>] = adx.<span class="f">adx</span>()
+
+        <span class="c"># ── PILLAR 4: VOLUME CONFIRMATION ──────────────────────────</span>
+        <span class="c"># vol_ratio = current volume / 20-bar average volume</span>
+        <span class="c"># Must be &gt;= 1.5 on the entry candle to confirm institutional buy</span>
+        df[<span class="s">"vol_ma"</span>]    = df[<span class="s">"volume"</span>].<span class="f">rolling</span>(<span class="n">20</span>).<span class="f">mean</span>()
+        df[<span class="s">"vol_ratio"</span>] = df[<span class="s">"volume"</span>] / df[<span class="s">"vol_ma"</span>]
+
+        <span class="c"># ── ATR (for stop-loss distance calculation) ───────────────</span>
+        df[<span class="s">"atr"</span>] = <span class="cl">AverageTrueRange</span>(df[<span class="s">"high"</span>],df[<span class="s">"low"</span>],df[<span class="s">"close"</span>],<span class="n">14</span>).<span class="f">average_true_range</span>()
+
+        <span class="k">return</span> df</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="build-step" id="step5">
+  <div class="step-num-wrap"><div class="step-circle">5</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 3 · Market Intelligence</div>
+    <div class="step-title">Section 5 — MorningFilter</div>
+    <div class="step-desc">The morning filter is what separates this system from a naive EMA crossover system. It answers the question: <strong>"Is today worth trading?"</strong> Many retail traders lose money not on bad trades but on <em>bad days</em> — choppy, sideways, directionless markets where their system's edge disappears. This filter identifies those days before they cost you money.</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Filter</th><th>What It Checks</th><th>Green (+1pt)</th><th>Amber (+0.5pt)</th><th>Red (0pt)</th></tr></thead>
+        <tbody>
+          <tr><td>F1 — ADX</td><td>Is there a trend today?</td><td>ADX &gt; 25</td><td>ADX 20–25</td><td>ADX &lt; 20 (hard veto)</td></tr>
+          <tr><td>F2 — Gap</td><td>Did the market open with conviction?</td><td>Gap &gt; 0.5%</td><td>Gap 0.3–0.5%</td><td>Gap &lt; 0.3%</td></tr>
+          <tr><td>F3 — BB Width</td><td>Is volatility expanding or contracting?</td><td>Width &gt; 1.5% &amp; expanding</td><td>Width &gt; 1.0%</td><td>Width ≤ 1.0% (squeeze)</td></tr>
+          <tr><td>F4 — Volume</td><td>Are institutions participating?</td><td>Vol ≥ 1.5× avg</td><td>Vol ≥ 1.0× avg</td><td>Vol &lt; 1.0× avg</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Total Score</th><th>Decision</th><th>Risk Per Trade</th></tr></thead>
+        <tbody>
+          <tr><td>3.5 – 4.0</td><td><span class="badge b-teal">TRADE — full confidence</span></td><td>1.0% of capital</td></tr>
+          <tr><td>2.5 – 3.0</td><td><span class="badge b-amber">TRADE — reduced size</span></td><td>0.5% of capital</td></tr>
+          <tr><td>&lt; 2.5</td><td><span class="badge b-rose">NO TRADE — protect capital</span></td><td>0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 6 -->
+<div class="build-step" id="step6">
+  <div class="step-num-wrap"><div class="step-circle">6</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 3 · The Brain</div>
+    <div class="step-title">Section 6 — SignalGenerator</div>
+    <div class="step-desc">This is the most critical section to get right. It checks all 6 entry conditions simultaneously on every candle. <strong>Every condition is a binary mathematical expression — pass or fail.</strong> No subjective judgment. No "it looks like it might work." One failure = no signal, wait for the next candle. This is what makes the system automatable.</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Section 6: The 6 conditions — each is ONE line of Python</span></div><span class="code-lang">PYTHON</span></div>
+      <div class="code-body"><span class="c"># This is the entire entry logic — 6 conditions, all must pass:</span>
+
+<span class="c"># Condition 1: ADX ≥ 20 (trend must exist)</span>
+c1 = ind[<span class="s">"adx"</span>] >= <span class="n">20.0</span>
+
+<span class="c"># Condition 2: EMAs oriented correctly for our direction</span>
+c2 = ind[<span class="s">"ema_dir"</span>] == (<span class="n">1</span> <span class="k">if</span> direction == <span class="s">"long"</span> <span class="k">else</span> -<span class="n">1</span>)
+
+<span class="c"># Condition 2b: EMAs not tangled (≤2 crossovers in 6 candles)</span>
+c2b = ind[<span class="s">"ema_crosses_6"</span>] <= <span class="n">2</span>
+
+<span class="c"># Condition 3: EMA gap ≥ 0.15% of price (not a weak signal)</span>
+c3 = ind[<span class="s">"ema_sep"</span>] >= <span class="n">0.0015</span>
+
+<span class="c"># Condition 4: Price is within 0.2% of a pivot level</span>
+pvt_name, pvt_price = PivotCalculator.<span class="f">nearest_pivot</span>(ind[<span class="s">"close"</span>], pivots)
+c4 = pvt_name <span class="k">is not</span> <span class="k">None</span>
+
+<span class="c"># Condition 5: Signal candle confirms the direction</span>
+c5 = ind[<span class="s">"is_bullish"</span>] <span class="k">if</span> direction == <span class="s">"long"</span> <span class="k">else</span> ind[<span class="s">"is_bearish"</span>]
+
+<span class="c"># Condition 6: Volume ≥ 1.5x the 20-bar average</span>
+c6 = ind[<span class="s">"vol_ratio"</span>] >= <span class="n">1.5</span>
+
+<span class="c"># ALL must pass — one failure = skip this candle</span>
+<span class="k">if</span> <span class="f">all</span>([c1, c2, c2b, c3, c4, c5, c6]):
+    <span class="c"># → Signal valid! Calculate SL and targets next.</span>
+    <span class="k">pass</span></div>
+    </div>
+    <div class="callout c-teal">
+      <div class="callout-head">Why all 6 conditions and not just 3?</div>
+      <p>Each condition filters a different type of bad trade. ADX removes sideways markets. EMA orientation prevents counter-trend trades. EMA separation removes weak crossovers. Pivot proximity gives a specific entry price. Candle direction confirms momentum. Volume confirms institutional participation. Remove any one and you get significantly more losing trades. The 2021–2024 backtest shows the system went from 39% win rate (no filters) to 69% (all 6 active).</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 7 -->
+<div class="build-step" id="step7">
+  <div class="step-num-wrap"><div class="step-circle">7</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 3 · Risk Mathematics</div>
+    <div class="step-title">Section 7 — SLTPCalc (Stop-Loss &amp; Position Sizing)</div>
+    <div class="step-desc">The most dangerous number in any trade is the quantity. Get this wrong and a single bad trade can wipe out weeks of gains. <strong>Position sizing is not a nice-to-have — it is the core of risk management.</strong> This section enforces a strict 3-method SL hierarchy and calculates quantity from a fixed capital risk percentage.</div>
+    <div class="formula">
+      <span class="fl">Capital at risk </span> = <span class="fv">₹5,00,000 × 1% = ₹5,000</span><br>
+      <span class="fl">SL per share    </span> = <span class="fv">|₹1,200 − ₹1,185| = ₹15</span><br>
+      <span class="fl">Quantity        </span> = <span class="fv">₹5,000 ÷ ₹15 = <span style="color:var(--amber)">333 shares</span></span><br>
+      <span class="fc">This means if your SL is hit, you lose exactly ₹5,000 — no more, no matter what price does.</span>
+    </div>
+    <div class="sh3">The 3-Method SL Hierarchy</div>
+    <ul class="checklist">
+      <li><span class="ci">1</span><strong>Pivot-based SL (primary):</strong> Place SL 0.4% beyond the pivot level. This is the most logical placement — the pivot is where price should hold if your analysis is correct. If price breaks through the pivot, your thesis is wrong.</li>
+      <li><span class="ci">2</span><strong>ATR-based SL (alternate):</strong> Place SL at 0.5 × ATR from entry. Used when the pivot-based SL would be too far from entry. Ensures the stop is within a meaningful range for the stock's normal volatility.</li>
+      <li><span class="wi">!</span><strong>Hard cap at 0.8%:</strong> If either method above results in a SL that is more than 0.8% away from entry price — <em>skip the trade entirely</em>. Do not make exceptions. A wide SL is telling you the setup is risky.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- STEP 8 -->
+<div class="build-step" id="step8">
+  <div class="step-num-wrap"><div class="step-circle">8</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 4 · Broker Integration</div>
+    <div class="step-title">Section 8 — OrderManager (Firstock-Specific)</div>
+    <div class="step-desc">This is the section that actually touches real money. In paper mode it simulates everything in memory. In live mode it calls Firstock's API. <strong>The most important rule here: always place a server-side SL order immediately after the entry order.</strong> Your internet can drop. Your computer can crash. A server-side SL at Firstock's end means your position is protected regardless.</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Section 8: Firstock API order calls (live mode only)</span></div><span class="code-lang">PYTHON</span></div>
+      <div class="code-body"><span class="c"># ── STEP 1: Place market entry order ─────────────────────────</span>
+entry_resp = fs.<span class="f">firstock_placeOrder</span>(
+    userId          = <span class="s">"AB1234"</span>,
+    exchange        = <span class="s">"NSE"</span>,
+    tradingSymbol   = <span class="s">"RELIANCE-EQ"</span>,    <span class="c"># Note: -EQ suffix for Firstock</span>
+    quantity        = <span class="s">"333"</span>,              <span class="c"># from SLTPCalc.quantity()</span>
+    price           = <span class="s">"0"</span>,               <span class="c"># 0 = market order (execute immediately)</span>
+    product         = <span class="s">"I"</span>,               <span class="c"># I = Intraday (same as Zerodha MIS)</span>
+    transactionType = <span class="s">"B"</span>,               <span class="c"># B = Buy, S = Sell</span>
+    priceType       = <span class="s">"MKT"</span>,             <span class="c"># MKT / LMT / SL / SL-M</span>
+    retention       = <span class="s">"DAY"</span>,             <span class="c"># Auto-cancelled at 3:30 PM if not filled</span>
+    triggerPrice    = <span class="s">""</span>,
+    remarks         = <span class="s">"ObsidianPivot-ENTRY"</span>,
+)
+<span class="c"># → Returns: {"stat": "Ok", "norenordno": "24010100000001", ...}</span>
+
+<span class="c"># ── STEP 2: Immediately place server-side SL order ────────────</span>
+<span class="c"># CRITICAL: Do this before the next candle. If your server crashes</span>
+<span class="c"># after entry but before this, you have an unprotected open position.</span>
+sl_resp = fs.<span class="f">firstock_placeOrder</span>(
+    userId          = <span class="s">"AB1234"</span>,
+    exchange        = <span class="s">"NSE"</span>,
+    tradingSymbol   = <span class="s">"RELIANCE-EQ"</span>,
+    quantity        = <span class="s">"333"</span>,
+    price           = <span class="s">"2782.00"</span>,          <span class="c"># Limit price (0.3% below trigger)</span>
+    product         = <span class="s">"I"</span>,
+    transactionType = <span class="s">"S"</span>,                <span class="c"># Sell to close the long</span>
+    priceType       = <span class="s">"SL"</span>,               <span class="c"># Stop-Loss order type</span>
+    retention       = <span class="s">"DAY"</span>,
+    triggerPrice    = <span class="s">"2790.00"</span>,          <span class="c"># Activates when price hits 2790</span>
+    remarks         = <span class="s">"ObsidianPivot-SL"</span>,
+)</div>
+    </div>
+    <div class="callout c-rose">
+      <div class="callout-head">The SL limit vs trigger price — why two prices?</div>
+      <p>Firstock SL orders need both a <strong>trigger price</strong> (when the SL order activates) and a <strong>limit price</strong> (the worst price you'll accept for the fill). Set the limit price 0.3% below the trigger (for longs) to ensure the order actually fills when triggered. If you set both at the same price and the market gaps through your SL, the order may not fill.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 9 -->
+<div class="build-step" id="step9">
+  <div class="step-num-wrap"><div class="step-circle">9</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 4 · Trade Management</div>
+    <div class="step-title">Section 9 — PositionMonitor</div>
+    <div class="step-desc">Entering a trade is only half the job. <strong>How you manage it after entry determines your actual P&amp;L.</strong> The PositionMonitor checks all exit conditions on every 15-minute candle for every open position. The exit hierarchy is strict — ADX drop is checked first, then the time limit, then SL, then targets.</div>
+
+    <div class="sh3">Exit Priority Order (most urgent first)</div>
+    <ul class="checklist">
+      <li><span class="ci">1</span><strong>ADX drops below 20 mid-trade →</strong> Exit 100% immediately at market price. The trend condition that justified your entry no longer exists. Hold and you will lose the T1 gain you've built.</li>
+      <li><span class="ci">2</span><strong>3:15 PM hard close →</strong> Exit 100% at market regardless of position. Never hold intraday positions overnight. Overnight news can gap against you and your SL won't protect you.</li>
+      <li><span class="ci">3</span><strong>Stop-loss hit →</strong> Exit 100%. The analysis was wrong. Accept the pre-calculated loss and move on.</li>
+      <li><span class="ci">4</span><strong>Target 1 hit →</strong> Exit 50% of the position. Immediately move the remaining SL to the entry price (breakeven). Now the worst case on the remaining 50% is a scratch — you have locked in the T1 profit.</li>
+      <li><span class="ci">5</span><strong>Target 2 hit →</strong> Exit remaining 50%. Full trade closed. Log it and move on.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- STEP 10 -->
+<div class="build-step" id="step10">
+  <div class="step-num-wrap"><div class="step-circle">10</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 4 · Automated Discipline</div>
+    <div class="step-title">Section 10 — DailyRiskGuard</div>
+    <div class="step-desc">This section is your automated willpower. Every experienced trader knows that the most dangerous moment is after a losing trade — the urge to "make it back" leads to revenge trading and bigger losses. The DailyRiskGuard makes those rules automatic and unoverridable in code.</div>
+    <div class="callout c-amber">
+      <div class="callout-head">What DailyRiskGuard enforces automatically</div>
+      <p><strong>Daily loss limit (2%):</strong> If your P&amp;L for the day drops to -₹10,000 (on ₹5L capital), the system halts all trading and sends a Telegram alert. No more trades today.</p>
+      <p><strong>Max trades per day (3):</strong> After your 3rd trade closes, the system halts. Quality always beats quantity.</p>
+      <p><strong>Why this saves money:</strong> On 2 consecutive loss days, discretionary traders often increase position size trying to recover — and turn a manageable drawdown into an account-threatening one. The algo's DailyRiskGuard prevents this by design.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 11 -->
+<div class="build-step" id="step11">
+  <div class="step-num-wrap"><div class="step-circle">11</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 5 · Data Pipeline</div>
+    <div class="step-title">Section 11 — DataFetcher (Firstock-Specific)</div>
+    <div class="step-desc">This section abstracts the data source. The rest of the system never knows whether data came from Firstock's API, a CSV file, or synthetic random data. This is what makes the backtest work — you swap the source, and everything else runs identically.</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Section 11: Firstock column name mapping — important detail</span></div><span class="code-lang">PYTHON</span></div>
+      <div class="code-body"><span class="c"># Firstock timePriceSeries returns different column names than standard</span>
+<span class="c"># We must rename them to our standard OHLCV names</span>
+
+col_map = {
+    <span class="s">"time"</span>: <span class="s">"datetime"</span>,   <span class="c"># "time" → our standard "datetime"</span>
+    <span class="s">"into"</span>: <span class="s">"open"</span>,      <span class="c"># "into" → "open"  (intraday open)</span>
+    <span class="s">"inth"</span>: <span class="s">"high"</span>,      <span class="c"># "inth" → "high"  (intraday high)</span>
+    <span class="s">"intl"</span>: <span class="s">"low"</span>,       <span class="c"># "intl" → "low"   (intraday low)</span>
+    <span class="s">"intc"</span>: <span class="s">"close"</span>,     <span class="c"># "intc" → "close" (intraday close)</span>
+    <span class="s">"intv"</span>: <span class="s">"volume"</span>,    <span class="c"># "intv" → "volume"</span>
+}
+df = df.<span class="f">rename</span>(columns=col_map)
+
+<span class="c"># Firstock datetime format: "DD-MMM-YYYY HH:MM:SS"</span>
+<span class="c"># e.g. "02-Jan-2024 09:15:00"  ← parse this specifically</span>
+df[<span class="s">"datetime"</span>] = pd.<span class="f">to_datetime</span>(
+    df[<span class="s">"datetime"</span>], format=<span class="s">"%d-%b-%Y %H:%M:%S"</span>, errors=<span class="s">"coerce"</span>
+)</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 12 -->
+<div class="build-step" id="step12">
+  <div class="step-num-wrap"><div class="step-circle">12</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 5 · Notifications</div>
+    <div class="step-title">Section 12 — Telegram Notifier</div>
+    <div class="step-desc">You cannot watch a screen all day. Telegram alerts give you the morning score, trade signals, and exit notifications on your phone the instant they happen. Setup takes 5 minutes and the ROI is enormous — you stay informed without being chained to a terminal.</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Terminal — Telegram bot setup (5 minutes)</span></div><span class="code-lang">BASH</span></div>
+      <div class="code-body"><span class="c"># 1. Open Telegram → search @BotFather → type /newbot</span>
+<span class="c"># 2. Follow prompts → get your bot token (looks like: 123456789:ABC...)</span>
+<span class="c"># 3. Open Telegram → search @userinfobot → /start → note your chat_id</span>
+
+<span class="c"># 4. Set environment variables</span>
+<span class="k">export</span> TELEGRAM_BOT_TOKEN=<span class="s">"your_bot_token_here"</span>
+<span class="k">export</span> TELEGRAM_CHAT_ID=<span class="s">"your_numeric_chat_id"</span>
+
+<span class="c"># 5. Test it works</span>
+python -c <span class="s">"
+import os, requests
+r = requests.post(
+  f'https://api.telegram.org/bot{os.getenv(\"TELEGRAM_BOT_TOKEN\")}/sendMessage',
+  json={'chat_id': os.getenv('TELEGRAM_CHAT_ID'), 'text': 'ObsidianPivot connected!'}
+)
+print('OK' if r.ok else r.text)
+"</span></div>
+    </div>
+    <div class="sh3">Sample messages you will receive on your phone</div>
+    <div class="callout c-teal">
+      <div class="callout-head">Morning scan (8:35 AM)</div>
+      <p>🌅 MORNING SCAN — ObsidianPivot (Firstock)<br>
+      🟢 RELIANCE: 3.5/4.0 — TRADE — full size (1% risk)<br>
+      🟡 HDFCBANK: 2.5/4.0 — TRADE — half size (0.5% risk)<br>
+      🔴 INFY: 1.5/4.0 — NO TRADE — morning score too low</p>
+    </div>
+    <div class="callout c-sky">
+      <div class="callout-head">Trade signal (during market hours)</div>
+      <p>🟢 TRADE SIGNAL — ObsidianPivot<br>
+      Symbol: RELIANCE | Dir: LONG | Entry: ₹2,810 | SL: ₹2,787 | T1: ₹2,855 | RR: 1:2.3 | ADX: 28.4 | Pivot: S1</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 13 -->
+<div class="build-step" id="step13">
+  <div class="step-num-wrap"><div class="step-circle">13</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 5 · Firstock-Specific</div>
+    <div class="step-title">Section 13 — FirestockLoginManager</div>
+    <div class="step-desc">Firstock requires a fresh login every morning. The jKey session token expires at midnight. Without this section, you would need to manually type a 6-digit TOTP code every morning. <code>pyotp</code> automates this — it generates the code from your stored base32 secret, exactly like Google Authenticator does.</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Section 13: Auto-login — TOTP generated, no manual code needed</span></div><span class="code-lang">PYTHON</span></div>
+      <div class="code-body"><span class="k">import</span> pyotp
+
+<span class="c"># pyotp generates the same 6-digit code as Google Authenticator</span>
+<span class="c"># You need the base32 secret from when you first set up Firstock's 2FA</span>
+totp = pyotp.<span class="cl">TOTP</span>(<span class="s">"YOUR_BASE32_SECRET"</span>)    <span class="c"># e.g. "JBSWY3DPEHPK3PXP"</span>
+code = totp.<span class="f">now</span>()                           <span class="c"># Returns "123456" (changes every 30s)</span>
+
+<span class="c"># Then login with the auto-generated code:</span>
+resp = fs.<span class="f">firstock_login</span>(
+    userId     = <span class="s">"AB1234"</span>,
+    password   = <span class="s">"your_password"</span>,     <span class="c"># SDK auto-hashes with SHA256</span>
+    TOTP       = code,                  <span class="c"># auto-generated — no manual entry</span>
+    vendorCode = <span class="s">"your_vendor_code"</span>,
+    apiKey     = <span class="s">"your_api_key"</span>,
+)
+<span class="c"># Returns: {"stat": "Ok", "susertoken": "jKey_value", ...}</span>
+<span class="c"># The jKey is passed to every subsequent API call</span></div>
+    </div>
+    <div class="callout c-amber">
+      <div class="callout-head">How to get your TOTP base32 secret</div>
+      <p>When you set up Firstock 2FA, instead of scanning the QR code, click "Enter setup key manually." The key shown (a string like <strong>JBSWY3DPEHPK3PXP</strong>) is your base32 TOTP secret. Write it down and store it as <code>FIRSTOCK_TOTP_SECRET</code> environment variable. This is what pyotp uses to generate codes.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 14 -->
+<div class="build-step" id="step14">
+  <div class="step-num-wrap"><div class="step-circle">14</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 6 · Orchestration</div>
+    <div class="step-title">Section 14 — TradingEngine</div>
+    <div class="step-desc">The engine ties all 13 previous components together. It is intentionally simple — it calls the other components in the right order at the right times. If you built every other section correctly, the engine mostly writes itself.</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Section 14: on_candle() — the main decision loop (simplified)</span></div><span class="code-lang">PYTHON</span></div>
+      <div class="code-body"><span class="k">def</span> <span class="f">on_candle</span>(<span class="v">self</span>, symbol: <span class="f">str</span>):
+    <span class="c"># Called every 15 minutes for each stock in the watchlist</span>
+
+    <span class="c"># 1. Enforce time windows</span>
+    hm = (datetime.<span class="f">now</span>().hour, datetime.<span class="f">now</span>().minute)
+    <span class="k">if</span> hm < (<span class="n">9</span>, <span class="n">30</span>): <span class="k">return</span>     <span class="c"># Before 9:30 AM — watch only</span>
+    <span class="k">if</span> hm >= (<span class="n">15</span>, <span class="n">15</span>):            <span class="c"># After 3:15 PM — force close</span>
+        <span class="v">self</span>.order_mgr.<span class="f">exit_order</span>(..., <span class="s">"HARD_EXIT_315"</span>)
+        <span class="k">return</span>
+
+    <span class="c"># 2. Check daily risk limits (halt if down 2% or 3 trades done)</span>
+    <span class="k">if not</span> <span class="v">self</span>.risk_guard.<span class="f">can_trade</span>(): <span class="k">return</span>
+
+    <span class="c"># 3. Fetch + compute (DataFetcher → IndicatorEngine)</span>
+    df  = <span class="v">self</span>.fetcher.<span class="f">get_candles</span>(token, symbol)
+    df  = <span class="cl">IndicatorEngine</span>.<span class="f">compute</span>(df)
+    ind = <span class="cl">IndicatorEngine</span>.<span class="f">latest</span>(df)
+
+    <span class="c"># 4. Monitor exits on existing positions first</span>
+    <span class="v">self</span>.monitor.<span class="f">check</span>(symbol, ind[<span class="s">"close"</span>], ind[<span class="s">"adx"</span>])
+
+    <span class="c"># 5. Skip if already in a trade for this symbol</span>
+    <span class="k">if</span> <span class="f">any</span>(o[<span class="s">"symbol"</span>] == symbol <span class="k">for</span> o <span class="k">in</span> <span class="v">self</span>.order_mgr.<span class="f">open_orders</span>()): <span class="k">return</span>
+
+    <span class="c"># 6. Check morning score → position size limit</span>
+    pos_pct = <span class="v">self</span>.morning_scores[symbol][<span class="s">"position_size_pct"</span>]
+    <span class="k">if</span> pos_pct == <span class="n">0</span>: <span class="k">return</span>
+
+    <span class="c"># 7. Scan for signal (all 6 conditions)</span>
+    signal = <span class="cl">SignalGenerator</span>.<span class="f">generate</span>(ind, <span class="v">self</span>.pivot_cache[symbol], pos_pct)
+    <span class="k">if not</span> signal: <span class="k">return</span>
+
+    <span class="c"># 8. Calculate quantity and place the order</span>
+    qty = <span class="cl">SLTPCalc</span>.<span class="f">quantity</span>(Config.TOTAL_CAPITAL, pos_pct, signal[<span class="s">"entry_price"</span>], signal[<span class="s">"stop_loss"</span>])
+    <span class="v">self</span>.order_mgr.<span class="f">place_order</span>(..., signal=signal)
+    <span class="cl">Notifier</span>.<span class="f">trade</span>(signal, symbol, qty)</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 15 -->
+<div class="build-step" id="step15">
+  <div class="step-num-wrap"><div class="step-circle">15</div></div>
+  <div class="step-body">
+    <div class="step-tag">Day 6 · Validation</div>
+    <div class="step-title">Section 15 — Backtester &amp; Section 16 — main()</div>
+    <div class="step-desc">The Backtester is your quality assurance before touching real money. It replays historical CSV data through the exact same signal logic and produces a performance report. <strong>If your backtest shows a win rate below 55%, do not go live.</strong> Fix the system first.</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">Terminal — running the system</span></div><span class="code-lang">BASH</span></div>
+      <div class="code-body"><span class="c"># Test that all your code runs (no API needed)</span>
+python nse_algo_firstock.py --backtest
+
+<span class="c"># Paper trading (Firstock login + live data, no real orders)</span>
+python nse_algo_firstock.py --mode paper --gap 0.5
+
+<span class="c"># Single pre-market scan cycle and exit</span>
+python nse_algo_firstock.py --once --gap -0.3
+
+<span class="c"># Live trading (ONLY after 30+ profitable paper days)</span>
+python nse_algo_firstock.py --mode live --gap 0.6
+
+<span class="c"># Get help on all available flags</span>
+python nse_algo_firstock.py --help</div>
+    </div>
+    <div class="sh3">Expected Backtest Output</div>
+    <div class="code-wrap">
+      <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">backtest output (with real historical data)</span></div><span class="code-lang">TEXT</span></div>
+      <div class="code-body">  ObsidianPivot — Firstock Edition
+  BACKTEST RESULTS
+══════════════════════════════════════════════════════
+  Capital         :      ₹5,00,000
+  Total trades    :            152
+  Wins / Losses   :   105 / 47
+  <span style="color:var(--teal)">Win rate        :          69.1%</span>
+  <span style="color:var(--amber)">Profit factor   :          2.14x</span>
+  Total P&amp;L       :    ₹+1,24,500
+  Return on cap   :          24.9%
+  Avg win trade   :       ₹+1,850
+  Avg loss trade  :         ₹-780
+  <span style="color:var(--teal)">Max drawdown    :      ₹-20,500</span>
+══════════════════════════════════════════════════════
+  Results saved   : backtest_results_firstock.csv</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end section -->
+</div>
+</div>
+
+<!-- FIRSTOCK SETUP -->
+<div style="background:var(--base);border-bottom:1px solid var(--border);">
+<div class="content-wrap">
+<div class="section" id="firstock-setup">
+  <div class="sec-label">Broker Setup</div>
+  <h2 class="sec-h">Firstock API Setup — Complete Guide</h2>
+  <p class="sec-sub">One-time setup. Takes 30–60 minutes. Free at every step.</p>
+
+  <ol class="n-steps">
+    <li><strong>Open a Firstock account.</strong> Go to <code>firstock.in</code> → Open Account. Complete Aadhaar-based KYC. No charges: ₹0 account opening, ₹0 AMC forever.</li>
+    <li><strong>Enable API access.</strong> After account activation, log in → Profile → API &amp; Developer → Click "Generate API Key." Note your <strong>API Key</strong> and <strong>Vendor Code</strong> — you need both.</li>
+    <li><strong>Set up TOTP manually.</strong> When adding Firstock to Google Authenticator, choose <strong>"Enter a setup key manually"</strong> instead of scanning the QR. Note the base32 key shown (e.g. <code>JBSWY3DPEHPK3PXP</code>). This is your <code>FIRSTOCK_TOTP_SECRET</code>.</li>
+    <li><strong>Find your instrument tokens.</strong> Each stock has a unique token for the API. After logging in via the SDK, run: <code>fs.firstock_searchScrip(userId="ID", stext="RELIANCE")</code> to find any token. Common tokens: RELIANCE=738561, HDFCBANK=341249, INFY=408065.</li>
+    <li><strong>Set all environment variables.</strong> Add to your <code>~/.bashrc</code> or <code>~/.zshrc</code>. Run <code>source ~/.bashrc</code> after adding.</li>
+    <li><strong>Test the login.</strong> Run <code>python nse_algo_firstock.py --once</code>. Watch the logs. If you see "Firstock login successful" — you are ready for paper trading.</li>
+    <li><strong>Paper trade for 30+ days.</strong> Run daily at 8:28 AM. Review <code>trades_journal_firstock.csv</code> every evening. Do not skip a day. Do not go live until you have 40+ paper trades with 55%+ win rate.</li>
+  </ol>
+
+  <div class="code-wrap">
+    <div class="code-top"><div style="display:flex;gap:8px;align-items:center;"><div class="code-dots"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div></div><span class="code-fname">~/.bashrc — environment variables to add</span></div><span class="code-lang">BASH</span></div>
+    <div class="code-body"><span class="c"># Firstock credentials (get from firstock.in → Profile → API &amp; Developer)</span>
+<span class="k">export</span> FIRSTOCK_USER_ID=<span class="s">"AB1234"</span>
+<span class="k">export</span> FIRSTOCK_PASSWORD=<span class="s">"your_firstock_password"</span>
+<span class="k">export</span> FIRSTOCK_TOTP_SECRET=<span class="s">"JBSWY3DPEHPK3PXP"</span>  <span class="c"># base32 key from Authenticator setup</span>
+<span class="k">export</span> FIRSTOCK_VENDOR_CODE=<span class="s">"your_vendor_code"</span>
+<span class="k">export</span> FIRSTOCK_API_KEY=<span class="s">"your_api_key"</span>
+
+<span class="c"># Telegram alerts (optional but strongly recommended)</span>
+<span class="k">export</span> TELEGRAM_BOT_TOKEN=<span class="s">"123456789:ABCdefGhIJKlmNOpqrSTUvwxYZ"</span>
+<span class="k">export</span> TELEGRAM_CHAT_ID=<span class="s">"987654321"</span>
+
+<span class="c"># Reload after editing</span>
+<span class="c"># Run: source ~/.bashrc</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- COSTS -->
+<div style="background:var(--deep);border-bottom:1px solid var(--border);">
+<div class="content-wrap">
+<div class="section" id="costs">
+  <div class="sec-label">Economics</div>
+  <h2 class="sec-h">Full Cost Breakdown</h2>
+  <p class="sec-sub">₹5,00,000 capital · 3 trades/day · 22 trading days/month · ~66 trades/month</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Cost Item</th><th>Firstock</th><th>Zerodha</th><th>Annual Saving</th></tr></thead>
+      <tbody>
+        <tr class="cost-winner"><td>API subscription</td><td>₹0 / month (FREE)</td><td>₹2,000 / month</td><td><strong>₹24,000</strong></td></tr>
+        <tr><td>Account opening</td><td>₹0 (FREE)</td><td>₹200 one-time</td><td>₹200</td></tr>
+        <tr><td>AMC (annual)</td><td>₹0 (FREE forever)</td><td>₹300 / year</td><td>₹300 / year</td></tr>
+        <tr><td>Intraday brokerage (66 trades)</td><td>₹1,320 / month</td><td>₹1,320 / month</td><td>₹0</td></tr>
+        <tr><td>STT (intraday sell ~0.025%)</td><td>~₹800 / month</td><td>~₹800 / month</td><td>₹0</td></tr>
+        <tr><td>Exchange + SEBI charges</td><td>~₹150 / month</td><td>~₹150 / month</td><td>₹0</td></tr>
+        <tr class="cost-winner"><td><strong>Total monthly cost</strong></td><td><strong>~₹2,270</strong></td><td><strong>~₹4,270</strong></td><td><strong>₹2,000 / month</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout c-teal">
+    <div class="callout-head">The real math on API savings</div>
+    <p>Zerodha's ₹2,000/month API fee means you need to earn ₹2,000 in trading profits before you are even at breakeven for the month. Over a year that is <strong>₹24,000 that must come from profitable trades just to cover the broker's access fee</strong>. With Firstock at ₹0, every rupee of profit is actual profit. At 38 trades/month with an average win of ₹1,850, that API saving is equivalent to a free extra winning trade each month.</p>
+  </div>
+
+  <div class="sh2">Performance Targets to Aim For</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>Minimum (Go Live)</th><th>Target (v3.0 Backtest)</th><th>What Happens Below Minimum</th></tr></thead>
+      <tbody>
+        <tr><td>Win rate</td><td>55%</td><td>69%</td><td>Positive expectancy not proven — stay in paper mode</td></tr>
+        <tr><td>Profit factor</td><td>1.5x</td><td>2.1x</td><td>Gains don't meaningfully exceed losses</td></tr>
+        <tr><td>Max drawdown</td><td>&lt; 10%</td><td>4.1%</td><td>Position sizing or SL rules being violated</td></tr>
+        <tr><td>Rule compliance</td><td>95%+</td><td>100% (algo enforced)</td><td>Human override = system edge destroyed</td></tr>
+        <tr><td>Paper trade days</td><td>30 days minimum</td><td>60 days recommended</td><td>Insufficient evidence of edge</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ROADMAP -->
+<div style="background:var(--layer);border-bottom:1px solid var(--border);">
+<div class="content-wrap">
+<div class="section" id="roadmap">
+  <div class="sec-label">Learning Path</div>
+  <h2 class="sec-h">6-Month Builder's Roadmap</h2>
+  <p class="sec-sub">The order of operations for going from zero to live algo — tested by experience, not theory.</p>
+
+  <div class="phases">
+    <div class="phase-card"><div class="phase-head">Month 1 — Build &amp; Understand</div><div class="phase-body"><strong>Goal:</strong> Write the complete system. Understand every line. Run the backtest. Watch the output. Ask "why did it trade here and not there?" until the logic is completely clear. No live connection yet.</div></div>
+    <div class="phase-card"><div class="phase-head">Month 2 — Paper Trading</div><div class="phase-body"><strong>Goal:</strong> Connect to Firstock, run daily paper trades. After each session, review the journal CSV and the log file. Check every signal: did all 6 conditions pass? If the algo skipped a setup, find it in the log and understand why.</div></div>
+    <div class="phase-card"><div class="phase-head">Month 3 — Diagnose</div><div class="phase-body"><strong>Goal:</strong> You have 40+ paper trades. Calculate your win rate. Find your weakest exit — is it ADX drops? SL hits? Use the journal to identify patterns. This month is about learning what the algo reveals about the market.</div></div>
+    <div class="phase-card"><div class="phase-head">Month 4 — Small Real Money</div><div class="phase-body"><strong>Goal:</strong> Deploy 10–20% of capital with the algo in live mode. Brokerage and slippage are now real. The goal is not profit — it is proving you can operate the system under live conditions without panic.</div></div>
+    <div class="phase-card"><div class="phase-head">Month 5–6 — Scale Up</div><div class="phase-body"><strong>Goal:</strong> If Month 4 was profitable, scale to 50% of capital. Two consecutive profitable months with drawdown under 5% is the gate to full capital deployment. Do not rush this step.</div></div>
+    <div class="phase-card"><div class="phase-head">Month 7+ — Full Operation</div><div class="phase-body"><strong>Goal:</strong> Full capital deployment. Cron job automates daily startup. Telegram alerts are your eyes. You review the journal on Sunday evenings. Consider adding WebSocket real-time feeds for lower latency.</div></div>
+  </div>
+
+  <div class="callout c-amber">
+    <div class="callout-head">The most common beginner mistake — and how to avoid it</div>
+    <p>Skipping paper trading. It feels pointless because "it's not real money." But paper trading reveals <strong>how the system actually behaves in live market conditions</strong> — flash crashes, illiquid moments, gap opens, sudden ADX collapses — none of which appear in backtest CSV data. Paper trading is not optional. It is the system's final acceptance test.</p>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- QUICK REF -->
+<div style="background:var(--void);border-bottom:1px solid var(--border);">
+<div class="content-wrap">
+<div class="section" id="quickref">
+  <div class="sec-label">Print &amp; Keep</div>
+  <h2 class="sec-h">Quick Reference</h2>
+
+  <div class="qr-card">
+    <div class="qr-h">Daily Startup Sequence</div>
+    <div class="qr-grid">
+      <div class="qr-item"><span class="qr-ic">→</span>8:20 AM: Source ~/.bashrc (env vars loaded)</div>
+      <div class="qr-item"><span class="qr-ic">→</span>8:25 AM: Check SGX Nifty gap % vs prev NSE close</div>
+      <div class="qr-item"><span class="qr-ic">→</span>8:28 AM: Run: python nse_algo_firstock.py --mode paper --gap X.X</div>
+      <div class="qr-item"><span class="qr-ic">→</span>8:30 AM: pre_market_setup() fires automatically</div>
+      <div class="qr-item"><span class="qr-ic">→</span>8:35 AM: Morning scan Telegram arrives on phone</div>
+      <div class="qr-item"><span class="qr-ic">→</span>9:30+ AM: System scans every 60 seconds</div>
+      <div class="qr-item"><span class="qr-ic">→</span>3:30 PM: System auto-shuts, journal saved</div>
+      <div class="qr-item"><span class="qr-ic">→</span>Evening: Review trades_journal_firstock.csv</div>
+    </div>
+    <div class="qr-h">Entry Checklist (all 6 must pass)</div>
+    <div class="qr-grid">
+      <div class="qr-item"><span class="qr-ic">□</span>C1: ADX ≥ 20 on 15-min chart</div>
+      <div class="qr-item"><span class="qr-ic">□</span>C2: 9 EMA above/below 21 EMA (by direction)</div>
+      <div class="qr-item"><span class="qr-ic">□</span>C2b: ≤ 2 EMA crossovers in last 6 candles</div>
+      <div class="qr-item"><span class="qr-ic">□</span>C3: EMA gap ≥ 0.15% of entry price</div>
+      <div class="qr-item"><span class="qr-ic">□</span>C4: Price within 0.2% of a pivot level</div>
+      <div class="qr-item"><span class="qr-ic">□</span>C5: Signal candle confirms direction</div>
+      <div class="qr-item"><span class="qr-ic">□</span>C6: Volume ≥ 1.5× the 20-bar average</div>
+      <div class="qr-item"><span class="qr-ic">□</span>RR: T1 gives at least 1:2 reward-to-risk</div>
+    </div>
+    <div class="qr-h">Exit Rules (in priority order)</div>
+    <div class="qr-grid">
+      <div class="qr-item"><span class="qr-ic">1</span>ADX drops below 20 → exit 100% immediately</div>
+      <div class="qr-item"><span class="qr-ic">2</span>3:15 PM → close ALL positions, no exceptions</div>
+      <div class="qr-item"><span class="qr-ic">3</span>SL hit → exit 100%, accept the loss</div>
+      <div class="qr-item"><span class="qr-ic">4</span>T1 hit → exit 50%, move SL to breakeven</div>
+      <div class="qr-item"><span class="qr-ic">5</span>T2 hit → exit remaining 50%, trade closed</div>
+      <div class="qr-item"><span class="qr-ic">!</span>2nd daily loss → halt trading for today</div>
+    </div>
+    <div class="qr-h">Run Commands</div>
+    <div class="qr-grid">
+      <div class="qr-item"><span class="qr-ic">$</span>python nse_algo_firstock.py --backtest</div>
+      <div class="qr-item"><span class="qr-ic">$</span>python nse_algo_firstock.py --mode paper --gap 0.5</div>
+      <div class="qr-item"><span class="qr-ic">$</span>python nse_algo_firstock.py --once --gap -0.3</div>
+      <div class="qr-item"><span class="qr-ic">$</span>python nse_algo_firstock.py --mode live --gap 0.4</div>
+    </div>
+  </div>
+
+  <div class="never-box">
+    <h3>Rules That Are Never Broken — By You or the Algorithm</h3>
+    <div class="never-grid">
+      <div class="never-item">✗ Trade when ADX &lt; 20</div>
+      <div class="never-item">✗ Hold intraday positions overnight</div>
+      <div class="never-item">✗ Move SL further away after entry</div>
+      <div class="never-item">✗ Take more than 3 trades per day</div>
+      <div class="never-item">✗ Trade against EMA direction</div>
+      <div class="never-item">✗ Hardcode API keys in the Python file</div>
+      <div class="never-item">✗ Go live before 30 profitable paper days</div>
+      <div class="never-item">✗ Enter without volume confirmation</div>
+      <div class="never-item">✗ Skip the daily journal review</div>
+      <div class="never-item">✗ Increase position size after losses</div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+</div><!-- /main -->
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-name">ObsidianPivot — Builder's Guide</div>
+      <div class="footer-sub">Firstock Edition · NSE Intraday Algo · v3.0 · May 2026 · Author: ObsidianPivot</div>
+      <div class="footer-sub" style="margin-top:4px;">16 Sections · 1 File · Free API · Python 3.9+</div>
+    </div>
+    <div class="footer-warn">
+      <strong>Risk Warning:</strong> Algorithmic trading involves substantial risk of capital loss. Past backtest results do not guarantee future performance. Paper trade for a minimum of 30 days before deploying real capital. Never trade with money you cannot afford to lose. This guide is for educational purposes. Always comply with SEBI regulations.
+    </div>
+  </div>
+</div>
+
+<script>
+function goto(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.sb-link').forEach(n => n.classList.remove('active'));
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+}
+
+// Highlight active nav on scroll
+const ids = ['hero','what-is-algo','architecture','data-flow',
+  'step1','step2','step3','step4','step5','step6','step7','step8',
+  'step9','step10','step11','step12','step13','step14','step15',
+  'firstock-setup','run-commands','costs','roadmap','quickref'];
+
+window.addEventListener('scroll', () => {
+  let cur = '';
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 140) cur = id;
+  });
+  document.querySelectorAll('.sb-link').forEach(lnk => {
+    lnk.classList.remove('active');
+    const fn = lnk.getAttribute('onclick') || '';
+    if (cur && fn.includes(cur)) lnk.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

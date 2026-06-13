@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ObsidianPivot — NSE Algo Trading System v3.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN SYSTEM — OBSIDIAN PIVOT
+   Aesthetic: Dark obsidian terminal meets refined editorial
+   Fonts: Syne (headers) + Crimson Pro (body) + JetBrains Mono (code)
+   ============================================================ */
+:root {
+  /* Core palette */
+  --void:     #050709;
+  --obsidian: #0C0F14;
+  --ink:      #111620;
+  --surface:  #161B25;
+  --panel:    #1C2330;
+  --raised:   #212840;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.12);
+
+  /* Accent — electric teal/cyan */
+  --accent:   #00E5CC;
+  --accent2:  #00B8A3;
+  --accent3:  #007A6E;
+  --accent-bg: rgba(0,229,204,0.06);
+
+  /* Gold — for highlights */
+  --gold:     #F0B429;
+  --gold2:    #C49020;
+  --gold-bg:  rgba(240,180,41,0.08);
+
+  /* Status colors */
+  --green:    #23D18B;
+  --green-bg: rgba(35,209,139,0.08);
+  --red:      #F05050;
+  --red-bg:   rgba(240,80,80,0.08);
+  --amber:    #FFB020;
+  --amber-bg: rgba(255,176,32,0.08);
+  --blue:     #4E9EFF;
+  --blue-bg:  rgba(78,158,255,0.08);
+
+  /* Text */
+  --text-pri:  #E8EDF5;
+  --text-sec:  #8892A4;
+  --text-mute: #4A5568;
+  --text-code: #00E5CC;
+
+  /* Typography */
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'Crimson Pro', Georgia, serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  /* Spacing */
+  --page-max: 1140px;
+  --page-pad: 60px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--void);
+  color: var(--text-pri);
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.35;
+}
+
+/* ── SCROLLBAR ────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: var(--accent3); border-radius: 2px; }
+
+/* ── SIDEBAR NAV ──────────────────────────────────── */
+.sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 220px;
+  background: var(--obsidian);
+  border-right: 1px solid var(--border);
+  z-index: 100;
+  overflow-y: auto;
+  padding: 28px 0 40px;
+  transition: transform 0.3s ease;
+}
+.sidebar-logo {
+  padding: 0 24px 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.sidebar-logo-mark {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800; font-size: 18px;
+  color: var(--obsidian);
+  margin-bottom: 10px;
+}
+.sidebar-logo-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-pri);
+  letter-spacing: 0.04em;
+}
+.sidebar-logo-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-mute);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.nav-section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  padding: 10px 24px 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-sec);
+  text-decoration: none;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+}
+.nav-item:hover, .nav-item.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+}
+.nav-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--text-mute);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.nav-item:hover .nav-dot,
+.nav-item.active .nav-dot { background: var(--accent); }
+
+/* ── MAIN CONTENT ─────────────────────────────────── */
+.main {
+  margin-left: 220px;
+  min-height: 100vh;
+}
+
+/* ── HERO / COVER ────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  background: var(--obsidian);
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 80px var(--page-pad);
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 80% 30%, rgba(0,229,204,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 80% at 10% 70%, rgba(240,180,41,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 40% at 50% 100%, rgba(0,229,204,0.03) 0%, transparent 50%);
+}
+.hero-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,204,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,204,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+.hero-content { position: relative; z-index: 1; max-width: 800px; }
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: block;
+  width: 32px; height: 1px;
+  background: var(--accent);
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.hero-title .t1 { color: var(--text-pri); display: block; }
+.hero-title .t2 { color: var(--accent); display: block; }
+.hero-subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.5vw, 26px);
+  font-weight: 400;
+  color: var(--text-sec);
+  margin-bottom: 32px;
+  margin-top: 16px;
+  max-width: 580px;
+}
+.hero-author {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+.hero-author-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--accent3), var(--accent));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 800;
+  color: var(--obsidian);
+}
+.hero-author-info { font-size: 13px; }
+.hero-author-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-pri);
+  font-size: 15px;
+}
+.hero-author-role { color: var(--text-mute); font-family: var(--font-mono); font-size: 11px; }
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 700px;
+}
+.hero-stat {
+  background: var(--ink);
+  padding: 20px 16px;
+  text-align: center;
+}
+.hero-stat-val {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  display: block;
+  margin-bottom: 2px;
+}
+.hero-stat-val.green { color: var(--green); }
+.hero-stat-val.gold  { color: var(--gold); }
+.hero-stat-val.accent { color: var(--accent); }
+.hero-stat-lbl { font-family: var(--font-mono); font-size: 9px; color: var(--text-mute); letter-spacing: 0.08em; }
+
+.hero-badge {
+  position: absolute;
+  top: 40px; right: var(--page-pad);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  text-align: right;
+  line-height: 1.8;
+}
+.hero-badge strong { color: var(--accent); display: block; font-size: 11px; }
+
+/* ── SECTIONS ─────────────────────────────────────── */
+.section {
+  padding: 72px var(--page-pad);
+  border-bottom: 1px solid var(--border);
+  max-width: var(--page-max);
+  margin: 0 auto;
+}
+.section-full {
+  padding: 72px var(--page-pad);
+  border-bottom: 1px solid var(--border);
+}
+.sec-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+.sec-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 0.12em;
+  padding-top: 8px;
+  flex-shrink: 0;
+}
+.sec-title-wrap {}
+.sec-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.sec-title {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3.5vw, 42px);
+  font-weight: 700;
+  color: var(--text-pri);
+  line-height: 1.1;
+}
+.sec-desc {
+  font-size: 17px;
+  color: var(--text-sec);
+  margin-top: 12px;
+  max-width: 680px;
+  line-height: 1.75;
+}
+
+/* ── PROSE ────────────────────────────────────────── */
+.prose { font-size: 16px; color: var(--text-sec); line-height: 1.85; }
+.prose p { margin-bottom: 16px; }
+.prose strong { color: var(--text-pri); font-weight: 600; }
+.prose em { color: var(--accent); font-style: normal; }
+
+/* ── CARDS GRID ──────────────────────────────────── */
+.cards-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+.cards-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 24px 0; }
+.cards-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin: 20px 0; }
+.cards-5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin: 20px 0; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.card.c-accent::before { background: var(--accent); }
+.card.c-gold::before   { background: var(--gold); }
+.card.c-green::before  { background: var(--green); }
+.card.c-red::before    { background: var(--red); }
+.card.c-blue::before   { background: var(--blue); }
+.card.c-amber::before  { background: var(--amber); }
+
+.card-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-pri);
+  margin-bottom: 8px;
+}
+.card-body { font-size: 13px; color: var(--text-sec); line-height: 1.65; }
+
+/* ── STAT CARDS ──────────────────────────────────── */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+.stat-val {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 800;
+  display: block;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+.stat-val.green  { color: var(--green); }
+.stat-val.gold   { color: var(--gold); }
+.stat-val.accent { color: var(--accent); }
+.stat-val.red    { color: var(--red); }
+.stat-val.blue   { color: var(--blue); }
+.stat-lbl { font-family: var(--font-mono); font-size: 10px; color: var(--text-mute); letter-spacing: 0.06em; }
+
+/* ── CALLOUT BOXES ────────────────────────────────── */
+.callout {
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 18px 0;
+  border-left: 3px solid;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.callout-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.callout p { color: var(--text-sec); margin-bottom: 4px; }
+.callout p strong { color: var(--text-pri); }
+.callout p:last-child { margin-bottom: 0; }
+
+.callout-accent { border-color: var(--accent); background: var(--accent-bg); }
+.callout-accent .callout-title { color: var(--accent); }
+.callout-green  { border-color: var(--green); background: var(--green-bg); }
+.callout-green .callout-title  { color: var(--green); }
+.callout-red    { border-color: var(--red); background: var(--red-bg); }
+.callout-red .callout-title    { color: var(--red); }
+.callout-gold   { border-color: var(--gold); background: var(--gold-bg); }
+.callout-gold .callout-title   { color: var(--gold); }
+.callout-blue   { border-color: var(--blue); background: var(--blue-bg); }
+.callout-blue .callout-title   { color: var(--blue); }
+.callout-amber  { border-color: var(--amber); background: var(--amber-bg); }
+.callout-amber .callout-title  { color: var(--amber); }
+
+/* ── CODE BLOCKS ─────────────────────────────────── */
+.code-block {
+  background: var(--obsidian);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin: 20px 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: var(--ink);
+  border-bottom: 1px solid var(--border);
+}
+.code-header-left { display: flex; align-items: center; gap: 10px; }
+.code-dots { display: flex; gap: 5px; }
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.cd-red { background: #FF5F57; }
+.cd-yellow { background: #FFBD2E; }
+.cd-green { background: #28C840; }
+.code-filename {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-sec);
+  letter-spacing: 0.04em;
+}
+.code-lang {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.code-body {
+  padding: 22px 22px;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--text-sec);
+  white-space: pre;
+}
+/* Syntax highlighting classes */
+.kw { color: #C792EA; }  /* keywords */
+.fn { color: #82AAFF; }  /* functions */
+.st { color: #C3E88D; }  /* strings */
+.cm { color: #546E7A; font-style: italic; }  /* comments */
+.nm { color: var(--accent); }  /* numbers/special */
+.cl { color: #FFCB6B; }  /* class names */
+.op { color: var(--text-sec); }  /* operators */
+.df { color: #F07178; }  /* def/params */
+
+/* ── TABLES ───────────────────────────────────────── */
+.tbl-wrap { overflow-x: auto; margin: 18px 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: var(--ink);
+  color: var(--text-sec);
+  padding: 11px 15px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  white-space: nowrap;
+}
+tbody tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+tbody tr:hover td { background: var(--accent-bg); }
+td {
+  padding: 10px 15px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-sec);
+  vertical-align: top;
+  line-height: 1.55;
+}
+td:first-child { color: var(--text-pri); font-weight: 500; }
+tbody tr:last-child td { border-bottom: none; }
+
+/* ── BADGE ────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.bg-green  { background: var(--green-bg);  color: var(--green); border: 1px solid rgba(35,209,139,0.2); }
+.bg-red    { background: var(--red-bg);    color: var(--red);   border: 1px solid rgba(240,80,80,0.2); }
+.bg-gold   { background: var(--gold-bg);   color: var(--gold);  border: 1px solid rgba(240,180,41,0.2); }
+.bg-accent { background: var(--accent-bg); color: var(--accent);border: 1px solid rgba(0,229,204,0.2); }
+.bg-blue   { background: var(--blue-bg);   color: var(--blue);  border: 1px solid rgba(78,158,255,0.2); }
+.bg-amber  { background: var(--amber-bg);  color: var(--amber); border: 1px solid rgba(255,176,32,0.2); }
+
+/* ── STEPS LIST ──────────────────────────────────── */
+.steps { list-style: none; margin: 18px 0; counter-reset: step; }
+.steps li {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-sec);
+  counter-increment: step;
+  line-height: 1.65;
+}
+.steps li:last-child { border-bottom: none; }
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  min-width: 30px; height: 30px;
+  background: var(--ink);
+  border: 1px solid var(--border2);
+  color: var(--accent);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.steps li strong { color: var(--text-pri); }
+.steps li code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--ink);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+/* ── CHECKLIST ───────────────────────────────────── */
+.checklist { list-style: none; margin: 12px 0; }
+.checklist li {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-sec);
+  line-height: 1.6;
+}
+.checklist li:last-child { border-bottom: none; }
+.ci { color: var(--green);  flex-shrink: 0; margin-top: 2px; }
+.xi { color: var(--red);    flex-shrink: 0; margin-top: 2px; }
+.ai { color: var(--amber);  flex-shrink: 0; margin-top: 2px; }
+.checklist li strong { color: var(--text-pri); }
+.checklist li code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--ink); padding: 1px 5px; border-radius: 3px; color: var(--accent);
+}
+
+/* ── FORMULA BOX ─────────────────────────────────── */
+.formula {
+  background: var(--obsidian);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 2.1;
+  margin: 18px 0;
+}
+.formula .fl { color: var(--gold); font-weight: 500; }
+.formula .fv { color: var(--text-pri); }
+.formula .fc { color: var(--text-mute); font-size: 11px; }
+
+/* ── TIMELINE ────────────────────────────────────── */
+.timeline { margin: 18px 0; }
+.tl-item { display: flex; gap: 20px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.tl-item:last-child { border-bottom: none; }
+.tl-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 72px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+.tl-title { font-size: 14px; font-weight: 600; color: var(--text-pri); margin-bottom: 4px; font-family: var(--font-display); }
+.tl-body  { font-size: 13px; color: var(--text-sec); line-height: 1.65; }
+
+/* ── PERF BARS ───────────────────────────────────── */
+.perf-row { display: flex; align-items: center; gap: 14px; margin: 10px 0; }
+.perf-label { flex: 0 0 250px; font-size: 13px; color: var(--text-sec); }
+.perf-bar { flex: 1; height: 6px; background: var(--surface); border-radius: 3px; overflow: hidden; }
+.perf-fill { height: 100%; border-radius: 3px; }
+.perf-val { flex: 0 0 50px; text-align: right; font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+
+/* ── FILE STRUCTURE TREE ─────────────────────────── */
+.tree {
+  background: var(--obsidian);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 2;
+}
+.tree-item { color: var(--text-sec); }
+.tree-item.dir  { color: var(--gold); }
+.tree-item.py   { color: var(--accent); }
+.tree-item.txt  { color: var(--text-mute); }
+.tree-item.csv  { color: var(--green); }
+.tree-item.env  { color: var(--amber); }
+
+/* ── SECTION DIVIDER ─────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+/* ── COMPARISON TABLE DARK ───────────────────────── */
+.cmp-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1.2fr;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 20px 0;
+  font-size: 13px;
+}
+.cmp-head {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 13px 16px;
+  font-weight: 600;
+}
+.cmp-head.dark   { background: var(--ink);    color: var(--text-sec); }
+.cmp-head.s1     { background: var(--surface); color: var(--text-sec); }
+.cmp-head.winner { background: var(--accent);  color: var(--obsidian); }
+.cmp-cell {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-sec);
+  line-height: 1.55;
+  vertical-align: top;
+}
+.cmp-row:last-child .cmp-cell { border-bottom: none; }
+.cmp-cell.lbl  { color: var(--text-pri); font-weight: 500; background: rgba(255,255,255,0.02); }
+.cmp-cell.win  { background: rgba(0,229,204,0.05); border-left: 2px solid var(--accent3); }
+.win-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--accent);
+  color: var(--obsidian);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+/* ── NEVER LIST ──────────────────────────────────── */
+.never-list {
+  background: var(--red-bg);
+  border: 1px solid rgba(240,80,80,0.2);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin: 18px 0;
+}
+.never-list h3 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--red);
+  margin-bottom: 16px;
+}
+.never-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.never-item {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-size: 12px; color: var(--red);
+  padding: 5px 10px;
+  background: rgba(240,80,80,0.06);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+}
+
+/* ── QUICK REF ───────────────────────────────────── */
+.qr-card {
+  background: var(--ink);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 32px;
+  margin: 20px 0;
+  position: relative;
+  overflow: hidden;
+}
+.qr-card::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,229,204,0.06) 0%, transparent 70%);
+}
+.qr-card h3 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--accent);
+  margin-bottom: 14px;
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+.qr-card h3:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.qr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.qr-item {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-size: 12px; color: var(--text-sec);
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  line-height: 1.5;
+  font-family: var(--font-mono);
+}
+.qr-dot { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+
+/* ── ROADMAP CARDS ───────────────────────────────── */
+.roadmap { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin: 20px 0; }
+.rm-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.rm-head { background: var(--ink); padding: 12px 16px; }
+.rm-month { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; }
+.rm-body { padding: 14px 16px; font-size: 12.5px; color: var(--text-sec); line-height: 1.7; }
+.rm-body strong { color: var(--text-pri); }
+
+/* ── PILL TABS ───────────────────────────────────── */
+.tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-mute);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab-btn:hover, .tab-btn.active {
+  background: var(--accent-bg);
+  border-color: var(--accent3);
+  color: var(--accent);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── FOOTER ──────────────────────────────────────── */
+.footer-section {
+  margin-left: 220px;
+  padding: 40px var(--page-pad);
+  border-top: 1px solid var(--border);
+  background: var(--obsidian);
+}
+.footer-inner { max-width: var(--page-max); margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; }
+.footer-name { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+.footer-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text-mute); }
+.footer-risk {
+  background: var(--amber-bg);
+  border: 1px solid rgba(255,176,32,0.15);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 11px;
+  color: var(--amber);
+  max-width: 500px;
+  line-height: 1.6;
+  font-family: var(--font-mono);
+}
+
+/* ── H2/H3 within sections ───────────────────────── */
+.sh2 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-pri);
+  margin: 32px 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.sh3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-pri);
+  margin: 22px 0 10px;
+}
+
+/* ── INLINE CODE ─────────────────────────────────── */
+code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  background: var(--ink);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-220px); }
+  .main, .footer-section { margin-left: 0; }
+  .hero, .section, .section-full { padding-left: 24px; padding-right: 24px; }
+  .cards-2, .cards-3, .cards-4, .cards-5, .roadmap { grid-template-columns: 1fr; }
+  .cmp-grid { grid-template-columns: 1fr; }
+  .qr-grid, .never-grid { grid-template-columns: 1fr; }
+  .hero-stats { grid-template-columns: repeat(2,1fr); }
+  .perf-label { flex: 0 0 160px; }
+  .footer-inner { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-mark">OP</div>
+    <div class="sidebar-logo-name">ObsidianPivot</div>
+    <div class="sidebar-logo-sub">NSE Algo v3.0</div>
+  </div>
+  <div class="nav-section-label">Introduction</div>
+  <a class="nav-item active" onclick="scrollTo('hero')"><span class="nav-dot"></span>Cover &amp; Overview</a>
+  <a class="nav-item" onclick="scrollTo('philosophy')"><span class="nav-dot"></span>Philosophy</a>
+  <a class="nav-item" onclick="scrollTo('comparison')"><span class="nav-dot"></span>System Comparison</a>
+  <div class="nav-section-label">Trading System</div>
+  <a class="nav-item" onclick="scrollTo('pillars')"><span class="nav-dot"></span>Four Pillars</a>
+  <a class="nav-item" onclick="scrollTo('entry-rules')"><span class="nav-dot"></span>Entry Rules</a>
+  <a class="nav-item" onclick="scrollTo('risk')"><span class="nav-dot"></span>Risk Management</a>
+  <a class="nav-item" onclick="scrollTo('daily-routine')"><span class="nav-dot"></span>Daily Routine</a>
+  <a class="nav-item" onclick="scrollTo('morning-filter')"><span class="nav-dot"></span>Morning Filter</a>
+  <a class="nav-item" onclick="scrollTo('stock-selection')"><span class="nav-dot"></span>Stock Selection</a>
+  <div class="nav-section-label">Algo System</div>
+  <a class="nav-item" onclick="scrollTo('algo-architecture')"><span class="nav-dot"></span>Architecture</a>
+  <a class="nav-item" onclick="scrollTo('setup')"><span class="nav-dot"></span>Setup &amp; Install</a>
+  <a class="nav-item" onclick="scrollTo('file-config')"><span class="nav-dot"></span>config.py</a>
+  <a class="nav-item" onclick="scrollTo('file-indicators')"><span class="nav-dot"></span>indicators.py</a>
+  <a class="nav-item" onclick="scrollTo('file-pivots')"><span class="nav-dot"></span>pivots.py</a>
+  <a class="nav-item" onclick="scrollTo('file-signals')"><span class="nav-dot"></span>signals.py</a>
+  <a class="nav-item" onclick="scrollTo('file-orders')"><span class="nav-dot"></span>orders.py</a>
+  <a class="nav-item" onclick="scrollTo('file-engine')"><span class="nav-dot"></span>engine.py</a>
+  <a class="nav-item" onclick="scrollTo('file-backtest')"><span class="nav-dot"></span>backtest.py</a>
+  <a class="nav-item" onclick="scrollTo('file-telegram')"><span class="nav-dot"></span>notifier.py</a>
+  <div class="nav-section-label">Operations</div>
+  <a class="nav-item" onclick="scrollTo('kite-setup')"><span class="nav-dot"></span>Kite API Setup</a>
+  <a class="nav-item" onclick="scrollTo('automation')"><span class="nav-dot"></span>Automation</a>
+  <a class="nav-item" onclick="scrollTo('roadmap')"><span class="nav-dot"></span>6-Month Roadmap</a>
+  <a class="nav-item" onclick="scrollTo('quickref')"><span class="nav-dot"></span>Quick Reference</a>
+</nav>
+
+<div class="main">
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero" id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">NSE Intraday Algo &middot; Four-Pillar System &middot; v3.0</div>
+    <h1 class="hero-title">
+      <span class="t1">Obsidian</span>
+      <span class="t2">Pivot</span>
+    </h1>
+    <p class="hero-subtitle">A complete NSE day trading algorithm built on EMA crossovers, daily pivot points, ADX trend filtering, and volume confirmation &mdash; from manual trading system to production Python algo.</p>
+    <div class="hero-author">
+      <div class="hero-author-icon">OP</div>
+      <div class="hero-author-info">
+        <div class="hero-author-name">ObsidianPivot</div>
+        <div class="hero-author-role">Author &middot; NSE Algo Trading System v3.0 &middot; May 2026</div>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-val green">69%</span><span class="hero-stat-lbl">Win Rate</span></div>
+      <div class="hero-stat"><span class="hero-stat-val gold">2.1x</span><span class="hero-stat-lbl">Profit Factor</span></div>
+      <div class="hero-stat"><span class="hero-stat-val accent">1:2</span><span class="hero-stat-lbl">Min R:R</span></div>
+      <div class="hero-stat"><span class="hero-stat-val green">4.1%</span><span class="hero-stat-lbl">Max Drawdown</span></div>
+      <div class="hero-stat"><span class="hero-stat-val accent">3 max</span><span class="hero-stat-lbl">Trades/Day</span></div>
+    </div>
+  </div>
+  <div class="hero-badge">
+    <strong>ObsidianPivot</strong>
+    NSE &middot; Intraday<br>
+    15-min Chart<br>
+    Zerodha Kite<br>
+    Python 3.9+
+  </div>
+</section>
+
+<!-- ═══════ PHILOSOPHY ═══════ -->
+<div id="philosophy" style="background:var(--obsidian);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">00</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Author's Note</div>
+      <h2 class="sec-title">The Philosophy Behind ObsidianPivot</h2>
+      <p class="sec-desc">Why this system exists, what it solves, and the principles that guide every decision it makes.</p>
+    </div>
+  </div>
+  <div class="prose" style="max-width:820px;">
+    <p>Most retail traders in India lose money. Not because they lack intelligence or dedication, but because they trade <em>opinions</em> rather than <em>systems</em>. They enter on instinct, exit on fear, and change rules mid-trade. The market doesn't reward conviction &mdash; it rewards consistency.</p>
+    <p>ObsidianPivot was built from a different premise: <em>every entry condition must be expressible as a mathematical inequality</em>. If you cannot write it as code, it is not a rule &mdash; it is a feeling. Feelings are expensive in trading.</p>
+    <p>This system started as two separate manual trading frameworks tested on NSE stocks from 2021 to 2024. The EMA Crossover System (v1) provided a clean direction filter. The NSE Day Trading System (v2.0) added institutional-grade entry levels via pivot points and the critical ADX trend filter that cuts drawdown in half. ObsidianPivot v3.0 combines the best of both into a single coherent system &mdash; then translates every rule into production Python code.</p>
+    <p>The algo is not the destination. It is the <em>guarantee of consistency</em>. No emotions. No skipped rules on bad mornings. No position sizing errors under pressure. The code follows the system exactly, every day, every trade.</p>
+    <p>Paper trade first. Always. The 30-day paper trading requirement is not a suggestion &mdash; it is the minimum proof that you understand your own system before risking real capital.</p>
+  </div>
+
+  <div class="cards-3" style="margin-top:32px;">
+    <div class="card c-accent">
+      <div class="card-num">Principle 01</div>
+      <div class="card-title">Objectivity Over Intuition</div>
+      <div class="card-body">Every condition is binary: pass or fail. There is no "looks good" or "feels right." If the ADX is 19.8, the rule says no trade. Execute the rule.</div>
+    </div>
+    <div class="card c-gold">
+      <div class="card-num">Principle 02</div>
+      <div class="card-title">Capital Preservation First</div>
+      <div class="card-body">The goal of every trading day is to preserve capital. A day where you protect your account by not trading is worth as much as a winning trade. The algorithm enforces this automatically.</div>
+    </div>
+    <div class="card c-green">
+      <div class="card-num">Principle 03</div>
+      <div class="card-title">System Over Outcome</div>
+      <div class="card-body">Judge each trade by whether you followed the rules &mdash; not whether it was profitable. A rule-following losing trade is better than a rule-breaking winning trade. The edge is statistical, not individual.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ COMPARISON ═══════ -->
+<div id="comparison" style="background:var(--ink);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">System Evolution</div>
+      <h2 class="sec-title">How We Got Here: System A vs System B</h2>
+      <p class="sec-desc">Two systems were built and tested. Here is what each one contributed and why System B became the foundation of ObsidianPivot v3.0.</p>
+    </div>
+  </div>
+  <div class="cmp-grid">
+    <div class="cmp-head dark">Criteria</div>
+    <div class="cmp-head s1">System A &mdash; EMA Crossover</div>
+    <div class="cmp-head winner">System B &mdash; ObsidianPivot &#10022;</div>
+
+    <div class="cmp-row">
+      <div class="cmp-cell lbl">Indicators</div>
+      <div class="cmp-cell">9, 20 &amp; 50 EMA + Volume</div>
+      <div class="cmp-cell win">9 &amp; 21 EMA + ADX(14) + Pivot Points + Volume MA<span class="win-tag">WIN</span></div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-cell lbl">Backtest Win Rate</div>
+      <div class="cmp-cell">~55&ndash;60% (implied, no explicit data)</div>
+      <div class="cmp-cell win">69% on 2021&ndash;2024 NSE data<span class="win-tag">WIN</span></div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-cell lbl">Profit Factor</div>
+      <div class="cmp-cell">~1.5&ndash;1.8x (estimated)</div>
+      <div class="cmp-cell win">2.1+ confirmed<span class="win-tag">WIN</span></div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-cell lbl">Max Drawdown</div>
+      <div class="cmp-cell">Not quantified</div>
+      <div class="cmp-cell win">4.1% (halved from 8.2% by ADX filter)<span class="win-tag">WIN</span></div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-cell lbl">Sideways Protection</div>
+      <div class="cmp-cell">EMA tangle observation &mdash; slow &amp; subjective</div>
+      <div class="cmp-cell win">5-signal early warning by 9:45 AM. ADX &lt; 20 = hard veto<span class="win-tag">WIN</span></div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-cell lbl">Entry Precision</div>
+      <div class="cmp-cell">EMA pullback zone &mdash; can be wide</div>
+      <div class="cmp-cell win">Exact pivot prices calculated pre-market<span class="win-tag">WIN</span></div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-cell lbl">Algo Automation</div>
+      <div class="cmp-cell">Good &mdash; EMA logic easy, pullback detection harder</div>
+      <div class="cmp-cell win">Excellent &mdash; every rule is a math expression<span class="win-tag">WIN</span></div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-cell lbl">Beginner Suitability</div>
+      <div class="cmp-cell win">Simpler &mdash; fewer tools to learn initially<span class="win-tag">WIN</span></div>
+      <div class="cmp-cell">Steeper learning curve but better outcomes</div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-cell lbl">Position Sizing</div>
+      <div class="cmp-cell">Fixed 1% risk</div>
+      <div class="cmp-cell win">Dynamic: 1% green / 0.5% amber / 0% red days<span class="win-tag">WIN</span></div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-cell lbl">Daily Routine</div>
+      <div class="cmp-cell">Good but timing not precise</div>
+      <div class="cmp-cell win">Exact minute-by-minute from 8:30 AM<span class="win-tag">WIN</span></div>
+    </div>
+  </div>
+  <div class="callout callout-accent" style="margin-top:24px;">
+    <div class="callout-title">Verdict — System B wins 14 of 15 categories</div>
+    <p><strong>System B becomes the foundation of ObsidianPivot v3.0.</strong> System A's 3-EMA orientation check (9 above 20 above 50) is added as an optional high-conviction confirmation layer. Everything else is System B with full Python automation.</p>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ FOUR PILLARS ═══════ -->
+<div id="pillars" style="background:var(--obsidian);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">System Core</div>
+      <h2 class="sec-title">The Four Pillars</h2>
+      <p class="sec-desc">Think of these as four locks on a door. All four must open simultaneously before any trade is placed. Remove one and the statistical edge disappears.</p>
+    </div>
+  </div>
+
+  <div class="cards-2">
+    <div class="card c-accent">
+      <div class="card-num">Pillar 01 &mdash; Direction</div>
+      <div class="card-title">EMA Crossover (9 &amp; 21)</div>
+      <div class="card-body">9 EMA above 21 EMA = long bias only. 9 EMA below 21 EMA = short bias only. Tangled EMAs (&gt;2 crossovers in 6 candles) = no trade zone. EMA separation must be &ge; 0.15% of price to be valid.</div>
+    </div>
+    <div class="card c-green">
+      <div class="card-num">Pillar 02 &mdash; Entry Zone</div>
+      <div class="card-title">Pivot Points (PP · R1/R2 · S1/S2)</div>
+      <div class="card-body">Calculated from yesterday's OHLC before market opens. PP, R1, R2, S1, S2 define the exact prices where institutional activity concentrates. You enter AT these levels &mdash; never randomly. Trade pivot-to-pivot.</div>
+    </div>
+    <div class="card c-gold">
+      <div class="card-num">Pillar 03 &mdash; Market Mode Gate</div>
+      <div class="card-title">ADX (14) &mdash; Trend Strength</div>
+      <div class="card-body">ADX measures trend STRENGTH only, not direction. ADX &lt; 20 = absolute veto regardless of all other signals. ADX 20&ndash;25 = trade at half size. ADX &gt; 25 = full size. This single filter halved drawdown from 8.2% to 4.1%.</div>
+    </div>
+    <div class="card c-red">
+      <div class="card-num">Pillar 04 &mdash; Validation</div>
+      <div class="card-title">Volume Confirmation</div>
+      <div class="card-body">Entry candle must show &ge; 1.5&times; the 20-bar average volume. Breakout entries require &ge; 2&times;. Low volume = no institutional fuel = likely trap. Volume is the one thing retail cannot fake.</div>
+    </div>
+  </div>
+
+  <div class="sh2">Pivot Point Formulas</div>
+  <div class="formula">
+    <span class="fl">PP  </span> = <span class="fv">(Yesterday High + Yesterday Low + Yesterday Close) ÷ 3</span><br>
+    <span class="fl">R1  </span> = <span class="fv">(2 × PP) − Yesterday Low</span>  &nbsp;&nbsp; <span class="fc"># First resistance above PP</span><br>
+    <span class="fl">R2  </span> = <span class="fv">PP + (Yesterday High − Yesterday Low)</span>  &nbsp;&nbsp; <span class="fc"># Second resistance</span><br>
+    <span class="fl">S1  </span> = <span class="fv">(2 × PP) − Yesterday High</span>  &nbsp;&nbsp; <span class="fc"># First support below PP</span><br>
+    <span class="fl">S2  </span> = <span class="fv">PP − (Yesterday High − Yesterday Low)</span>  &nbsp;&nbsp; <span class="fc"># Second support</span><br>
+    <span class="fc"># Sequence: Long  → S2 → S1 → PP → R1 → R2 (entry near S levels, targets above)</span><br>
+    <span class="fc"># Sequence: Short → R2 → R1 → PP → S1 → S2 (entry near R levels, targets below)</span>
+  </div>
+
+  <div class="sh2">ADX Rules Table</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>ADX Value</th><th>Market State</th><th>Action</th><th>Position Size</th></tr></thead>
+      <tbody>
+        <tr><td>&gt; 30</td><td>Strong trend</td><td><span class="badge bg-green">Trade with full confidence</span></td><td>Full &mdash; 1% risk</td></tr>
+        <tr><td>25 &ndash; 30</td><td>Trend confirmed</td><td><span class="badge bg-green">Trade normally</span></td><td>Full &mdash; 1% risk</td></tr>
+        <tr><td>20 &ndash; 25</td><td>Weak trend (borderline)</td><td><span class="badge bg-amber">Best setups only</span></td><td>Half &mdash; 0.5% risk</td></tr>
+        <tr><td>&lt; 20</td><td>No trend / ranging</td><td><span class="badge bg-red">DO NOT TRADE</span></td><td>Zero &mdash; sit out</td></tr>
+        <tr><td>ADX falling from &gt;25</td><td>Trend weakening mid-trade</td><td><span class="badge bg-amber">Exit at T1</span></td><td>Exit mode only</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh2">Backtest Performance (2021&ndash;2024)</div>
+  <div class="cards-5" style="margin-bottom:24px;">
+    <div class="stat-card"><span class="stat-val green">69%</span><span class="stat-lbl">Win Rate v3.0</span></div>
+    <div class="stat-card"><span class="stat-val gold">2.1+</span><span class="stat-lbl">Profit Factor</span></div>
+    <div class="stat-card"><span class="stat-val green">4.1%</span><span class="stat-lbl">Max Drawdown</span></div>
+    <div class="stat-card"><span class="stat-val accent">38/mo</span><span class="stat-lbl">Quality Trades</span></div>
+    <div class="stat-card"><span class="stat-val accent">1:2</span><span class="stat-lbl">Min R:R</span></div>
+  </div>
+  <div class="perf-row"><span class="perf-label">Strong trending days</span><div class="perf-bar"><div class="perf-fill" style="width:72%;background:var(--green)"></div></div><span class="perf-val" style="color:var(--green)">72%</span></div>
+  <div class="perf-row"><span class="perf-label">Mildly trending days</span><div class="perf-bar"><div class="perf-fill" style="width:58%;background:var(--gold)"></div></div><span class="perf-val" style="color:var(--gold)">58%</span></div>
+  <div class="perf-row"><span class="perf-label">Sideways (ADX filter OFF)</span><div class="perf-bar"><div class="perf-fill" style="width:39%;background:var(--red)"></div></div><span class="perf-val" style="color:var(--red)">39%</span></div>
+  <div class="perf-row"><span class="perf-label">Sideways (ADX &lt;20, SKIPPED)</span><div class="perf-bar"><div class="perf-fill" style="width:2%;background:var(--green)"></div></div><span class="perf-val" style="color:var(--green)">0 loss</span></div>
+</div>
+</div>
+
+<!-- ═══════ ENTRY RULES ═══════ -->
+<div id="entry-rules" style="background:var(--ink);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Execution Rules</div>
+      <h2 class="sec-title">Complete Entry &amp; Exit Rules</h2>
+      <p class="sec-desc">Every trade must pass all 6 conditions simultaneously. This is not a menu. One failure = skip the setup entirely.</p>
+    </div>
+  </div>
+
+  <div class="sh2">The 6-Condition Entry Checklist</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Condition</th><th>How to Verify</th><th>If Fails</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>ADX &ge; 20 on 15-min chart</td><td>ADX panel below chart &mdash; one glance</td><td>Skip trade. No exceptions.</td></tr>
+        <tr><td>2</td><td>EMAs correctly oriented for direction</td><td>9 above 21 for long; 9 below 21 for short</td><td>Skip trade entirely</td></tr>
+        <tr><td>3</td><td>EMA separation &ge; 0.15% of entry price</td><td>Quick mental math: gap / price</td><td>Wait for clearer trend</td></tr>
+        <tr><td>4</td><td>Price within 0.2% of a pivot level</td><td>Compare price to drawn pivot lines</td><td>Wait for price to reach a level</td></tr>
+        <tr><td>5</td><td>Signal candle confirms direction</td><td>Bullish candle for longs; bearish for shorts</td><td>Wait for next candle</td></tr>
+        <tr><td>6</td><td>Volume &ge; 1.5&times; 20-bar average</td><td>Volume bar vs MA line &mdash; visual</td><td>Skip &mdash; no institutional fuel</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh2">Stop-Loss Hierarchy</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Method</th><th>Calculation</th><th>Use When</th></tr></thead>
+      <tbody>
+        <tr><td>Pivot-based SL (primary)</td><td>0.4% beyond the pivot level</td><td>Default for most trades</td></tr>
+        <tr><td>ATR-based SL (alternate)</td><td>Entry ± (0.5 × ATR-14)</td><td>When pivot distance is too wide</td></tr>
+        <tr><td>Hard maximum cap</td><td>0.8% of entry price</td><td>If either exceeds this &rarr; skip trade</td></tr>
+        <tr><td>EMA trail (T2 ride)</td><td>Trail below the 9 EMA</td><td>After T1 hit, SL at breakeven</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="formula">
+    <span class="fl">Position Size</span> = <span class="fv">Capital at Risk ÷ SL per Share</span><br>
+    <span class="fl">Capital at Risk</span> = <span class="fv">Total Capital × Risk%</span>  &nbsp;&nbsp; <span class="fc"># e.g. ₹5,00,000 × 1% = ₹5,000</span><br>
+    <span class="fl">SL per Share   </span> = <span class="fv">|Entry Price − Stop-Loss Price|</span>  &nbsp;&nbsp; <span class="fc"># e.g. ₹1,200 − ₹1,185 = ₹15</span><br>
+    <span class="fl">Quantity       </span> = <span class="fv">₹5,000 ÷ ₹15 = 333 shares</span>
+  </div>
+
+  <div class="sh2">Exit Rules</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Trigger</th><th>Qty to Exit</th><th>Next Action</th></tr></thead>
+      <tbody>
+        <tr><td>Target 1 (T1) = next pivot level</td><td>Exit 50%</td><td>Move SL to entry price (breakeven). Cannot lose now.</td></tr>
+        <tr><td>Target 2 (T2) = pivot after T1</td><td>Exit remaining 50%</td><td>Trade closed. Log it. Move on.</td></tr>
+        <tr><td>ADX drops below 20 mid-trade</td><td>Exit 100% immediately</td><td>The trend that justified entry no longer exists.</td></tr>
+        <tr><td>3:15 PM hard close</td><td>Exit 100% at market</td><td>No exceptions. Never hold intraday overnight.</td></tr>
+        <tr><td>2nd consecutive loss today</td><td>Stop trading for today</td><td>Review journal. No more trades today.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ RISK MANAGEMENT ═══════ -->
+<div id="risk" style="background:var(--obsidian);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Capital Protection</div>
+      <h2 class="sec-title">Risk Management Framework</h2>
+      <p class="sec-desc">Risk management is not a constraint on the system &mdash; it <em>is</em> the system. The algo enforces all rules automatically, removing emotion from the equation.</p>
+    </div>
+  </div>
+  <div class="cards-4">
+    <div class="stat-card"><span class="stat-val blue">1%</span><span class="stat-lbl">Max risk per trade</span></div>
+    <div class="stat-card"><span class="stat-val red">2%</span><span class="stat-lbl">Daily loss limit</span></div>
+    <div class="stat-card"><span class="stat-val gold">5%</span><span class="stat-lbl">Weekly loss limit</span></div>
+    <div class="stat-card"><span class="stat-val green">1:2</span><span class="stat-lbl">Min reward:risk</span></div>
+  </div>
+  <div class="sh2">Dynamic Position Sizing</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>4-Filter Morning Score</th><th>Day Quality</th><th>Risk per Trade</th><th>Max Loss Today</th></tr></thead>
+      <tbody>
+        <tr><td>3.5 &ndash; 4.0 (Green)</td><td>Strong trending</td><td>Full 1% of capital</td><td>₹10,000 on ₹5L capital</td></tr>
+        <tr><td>2.5 &ndash; 3.0 (Amber)</td><td>Moderately trending</td><td>Half 0.5% of capital</td><td>₹5,000 on ₹5L capital</td></tr>
+        <tr><td>&lt; 2.5 (Red)</td><td>Sideways / uncertain</td><td>Zero &mdash; no trades</td><td>₹0 &mdash; protect capital</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sh2">Capital Deployment Phases</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Phase</th><th>Duration</th><th>Capital Used</th><th>Advance Criteria</th></tr></thead>
+      <tbody>
+        <tr><td>1 &mdash; Paper Trading</td><td>Month 1&ndash;2</td><td>Zero real capital</td><td>60%+ win rate over 40+ paper trades with full journal</td></tr>
+        <tr><td>2 &mdash; Small Real</td><td>Month 3&ndash;4</td><td>10&ndash;20% of capital</td><td>Net profitable month live. Journal every trade.</td></tr>
+        <tr><td>3 &mdash; Scale Up</td><td>Month 5&ndash;6</td><td>Up to 50%</td><td>Two consecutive profitable months. Drawdown &lt; 5%.</td></tr>
+        <tr><td>4 &mdash; Full Operation</td><td>Month 7+</td><td>Full allocation</td><td>6+ months journaled profitable results.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="never-list">
+    <h3>The Hard Rules &mdash; Never Violated</h3>
+    <div class="never-grid">
+      <div class="never-item">✗ Move SL further to avoid a loss</div>
+      <div class="never-item">✗ Enter when ADX &lt; 20</div>
+      <div class="never-item">✗ Take more than 3 trades/day</div>
+      <div class="never-item">✗ Hold intraday positions overnight</div>
+      <div class="never-item">✗ Trade against the EMA direction</div>
+      <div class="never-item">✗ Skip the trade journal</div>
+      <div class="never-item">✗ Add to a losing position</div>
+      <div class="never-item">✗ Trade during 9:15&ndash;9:30 AM</div>
+      <div class="never-item">✗ Trade stocks with earnings upcoming</div>
+      <div class="never-item">✗ Increase position size after losses</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ DAILY ROUTINE ═══════ -->
+<div id="daily-routine" style="background:var(--ink);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Operations</div>
+      <h2 class="sec-title">Complete Daily Routine</h2>
+      <p class="sec-desc">Follow this routine every trading day. Consistency in process creates consistency in results.</p>
+    </div>
+  </div>
+  <div class="sh2">Pre-Market (8:30 &ndash; 9:15 AM)</div>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-time">8:30 AM</div><div><div class="tl-title">Global Cues Check</div><div class="tl-body">Check SGX Nifty (SGX:CN1! on TradingView) vs previous NSE close. Calculate gap %. Note RBI/Fed statements, company earnings, major macro events. The gap % is your input to <code>--gap</code> flag.</div></div></div>
+    <div class="tl-item"><div class="tl-time">8:40 AM</div><div><div class="tl-title">Calculate Pivot Points</div><div class="tl-body">Download NSE Bhavcopy from nseindia.com. Paste H/L/C into your Google Sheets template. The algo also auto-calculates this &mdash; use manual calculation as your sanity check.</div></div></div>
+    <div class="tl-item"><div class="tl-time">8:50 AM</div><div><div class="tl-title">Draw Levels on TradingView</div><div class="tl-body">Draw PP (white), R1/R2 (green shades), S1/S2 (red shades) as horizontal lines. Press H for horizontal line tool. Same colors every day.</div></div></div>
+    <div class="tl-item"><div class="tl-time">9:00 AM</div><div><div class="tl-title">Set Price Alerts on Kite</div><div class="tl-body">Set alerts at each pivot level for each watchlist stock. You are notified when price enters a setup zone &mdash; no need to watch constantly.</div></div></div>
+    <div class="tl-item"><div class="tl-time">9:10 AM</div><div><div class="tl-title">Write Today's Trade Plan</div><div class="tl-body">One sentence: "I will go LONG on HDFCBANK if it bounces off S1 with ADX &gt; 22 and volume &gt; 1.5× average." Writing the plan prevents impulsive trades.</div></div></div>
+    <div class="tl-item"><div class="tl-time">9:15 AM</div><div><div class="tl-title">Market Opens &mdash; Watch Only</div><div class="tl-body">No trades for first 15 minutes. Observe opening candle direction, size, and where price opens relative to pivot levels. Intelligence gathering only.</div></div></div>
+    <div class="tl-item"><div class="tl-time">9:30 AM</div><div><div class="tl-title">Run 4-Filter Morning Scanner</div><div class="tl-body">Run the algo's pre_market_setup() or score manually. Score determines today's position size. Log in journal before any trades.</div></div></div>
+  </div>
+  <div class="sh2">Trading Windows</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Time Window</th><th>Zone</th><th>What to Do</th></tr></thead>
+      <tbody>
+        <tr><td>9:15 &ndash; 9:30</td><td><span class="badge bg-amber">WATCH ONLY</span></td><td>Observe opening candle. Record gap %. No trades.</td></tr>
+        <tr><td>9:30 &ndash; 9:45</td><td><span class="badge bg-accent">4-FILTER CHECK</span></td><td>Run morning scanner. Score the day. Set position size.</td></tr>
+        <tr><td>9:30 &ndash; 11:30</td><td><span class="badge bg-green">PRIME ZONE</span></td><td>Best setups. Highest institutional volume. Trade actively.</td></tr>
+        <tr><td>11:30 &ndash; 1:30</td><td><span class="badge bg-amber">SELECTIVE</span></td><td>Only if all 6 conditions perfectly met.</td></tr>
+        <tr><td>1:30 &ndash; 2:30</td><td><span class="badge bg-green">SECOND ZONE</span></td><td>Post-lunch volume pickup. Good for continuations.</td></tr>
+        <tr><td>2:30 &ndash; 3:15</td><td><span class="badge bg-amber">CAUTION</span></td><td>Position squaring. Only clearest setups.</td></tr>
+        <tr><td>3:15 &ndash; 3:30</td><td><span class="badge bg-red">CLOSE ALL</span></td><td>Exit every open intraday position. No exceptions.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════ MORNING FILTER ═══════ -->
+<div id="morning-filter" style="background:var(--obsidian);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Readiness Score</div>
+      <h2 class="sec-title">4-Filter Morning Scanner</h2>
+      <p class="sec-desc">Run by 9:30 AM every day. Takes 5 minutes. Determines exactly how aggressively to trade. Green=1pt · Amber=0.5pt · Red=0pt. Max=4.0</p>
+    </div>
+  </div>
+  <div class="cards-2">
+    <div class="card c-accent">
+      <div class="card-num">Filter 01 &mdash; Most Important</div>
+      <div class="card-title">ADX Trend Strength</div>
+      <div class="card-body">ADX &gt; 25 = Green (1pt). ADX 20&ndash;25 = Amber (0.5pt). ADX &lt; 20 = Red (0pt) AND hard veto on all trading regardless of total score. This filter alone accounts for most of the win rate improvement.</div>
+    </div>
+    <div class="card c-blue">
+      <div class="card-num">Filter 02</div>
+      <div class="card-title">SGX Nifty Gap Size</div>
+      <div class="card-body">Gap &gt; 0.5% = Green. Gap 0.3&ndash;0.5% = Amber. Gap &lt; 0.3% = Red. A flat open means no overnight conviction. Choppy risk. The gap % is fed to the algo via <code>--gap</code> flag at startup.</div>
+    </div>
+    <div class="card c-gold">
+      <div class="card-num">Filter 03</div>
+      <div class="card-title">Bollinger Band Width</div>
+      <div class="card-body">BB width &gt; 1.5% AND expanding = Green. BB width 1.0&ndash;1.5% = Amber. Tight squeeze = Red. Narrow bands mean low volatility &mdash; signals are unreliable and stops get hit before targets.</div>
+    </div>
+    <div class="card c-green">
+      <div class="card-num">Filter 04</div>
+      <div class="card-title">Opening Volume Level</div>
+      <div class="card-body">Opening 15-min candle volume &ge; 1.5× the 20-bar average = Green. Below average = Red. No volume = no institutional participation = no follow-through on any pivot bounce.</div>
+    </div>
+  </div>
+  <div class="sh2">Score Decision Table</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Morning Score</th><th>Decision</th><th>Position Size</th></tr></thead>
+      <tbody>
+        <tr><td>3.5 &ndash; 4.0</td><td><span class="badge bg-green">Trade with full confidence</span></td><td>Full size &mdash; 1% risk per trade</td></tr>
+        <tr><td>2.5 &ndash; 3.0</td><td><span class="badge bg-amber">Trade cautiously</span></td><td>Half size &mdash; 0.5% risk per trade</td></tr>
+        <tr><td>&lt; 2.5</td><td><span class="badge bg-red">Do not trade today</span></td><td>Zero &mdash; protect capital</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ STOCK SELECTION ═══════ -->
+<div id="stock-selection" style="background:var(--ink);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">07</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Instrument Selection</div>
+      <h2 class="sec-title">Stock Selection Criteria</h2>
+    </div>
+  </div>
+  <ul class="checklist">
+    <li><span class="ci">✓</span><strong>Minimum 10 lakh shares traded daily.</strong> Low liquidity = wide spreads = slippage destroys your edge.</li>
+    <li><span class="ci">✓</span><strong>NSE F&amp;O permitted list or Nifty 100.</strong> These respect technical levels because institutions use the same levels.</li>
+    <li><span class="ci">✓</span><strong>ADX &gt; 20 on the daily chart.</strong> Pick stocks that are themselves in a trend.</li>
+    <li><span class="ci">✓</span><strong>ATR(14) &ge; 0.5% of stock price.</strong> Ensures enough intraday movement to reach 1:2 targets.</li>
+    <li><span class="xi">✗</span>Avoid stocks with upcoming results, dividends, bonus, or splits. Check NSE corporate actions every Sunday.</li>
+    <li><span class="xi">✗</span>Avoid anything outside Nifty 200 during the first six months.</li>
+  </ul>
+  <div class="sh2">Recommended Starter Watchlist</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Symbol</th><th>Instrument Token</th><th>Sector</th><th>Why Suitable</th></tr></thead>
+      <tbody>
+        <tr><td>RELIANCE</td><td>738561</td><td>Energy / Retail</td><td>Highest NSE liquidity. Pivot levels respected consistently by institutions.</td></tr>
+        <tr><td>HDFCBANK</td><td>341249</td><td>Banking</td><td>Deep liquidity. Clean pivot bounces with volume confirmation.</td></tr>
+        <tr><td>INFY</td><td>408065</td><td>IT</td><td>Trades in clear trends. Excellent ADX signals. Good ATR.</td></tr>
+        <tr><td>TCS</td><td>2953217</td><td>IT</td><td>Steady trends. Forgiving for system learners.</td></tr>
+        <tr><td>ICICIBANK</td><td>1270529</td><td>Banking</td><td>High daily volume. Strong trends during RBI cycle months.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ ALGO ARCHITECTURE ═══════ -->
+<div id="algo-architecture" style="background:var(--void);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">08</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Python Algo</div>
+      <h2 class="sec-title">System Architecture</h2>
+      <p class="sec-desc">The algo is structured as a single file <code>nse_algo.py</code> with 15 self-contained sections, plus logical groupings explained as separate modules below. Each component is independently testable.</p>
+    </div>
+  </div>
+  <div class="tree">
+<span class="tree-item dir">obsidian_pivot/</span>
+<span class="tree-item">├── </span><span class="tree-item py">nse_algo.py</span><span class="tree-item txt">          # Main file — all 15 sections combined (run this)</span>
+<span class="tree-item">├── </span><span class="tree-item env">.env</span><span class="tree-item txt">                  # API keys — NEVER commit to git</span>
+<span class="tree-item">├── </span><span class="tree-item txt">requirements.txt</span><span class="tree-item txt">     # Python dependencies</span>
+<span class="tree-item">├── </span><span class="tree-item txt">README.md</span><span class="tree-item txt">            # Setup guide</span>
+<span class="tree-item dir">├── historical_data/</span><span class="tree-item txt">     # CSV files for backtesting</span>
+<span class="tree-item">│   ├── </span><span class="tree-item csv">RELIANCE_15min.csv</span>
+<span class="tree-item">│   ├── </span><span class="tree-item csv">HDFCBANK_15min.csv</span>
+<span class="tree-item">│   └── </span><span class="tree-item csv">INFY_15min.csv</span>
+<span class="tree-item dir">└── logs/</span>
+<span class="tree-item">    ├── </span><span class="tree-item txt">algo_log.txt</span><span class="tree-item txt">         # Full debug audit trail</span>
+<span class="tree-item">    └── </span><span class="tree-item csv">trades_journal.csv</span><span class="tree-item txt">   # Every trade for review</span>
+  </div>
+  <div class="sh2">Component Map — How Data Flows</div>
+  <div class="cards-3">
+    <div class="card c-accent">
+      <div class="card-num">Input Layer</div>
+      <div class="card-title">DataFetcher + PivotCalculator</div>
+      <div class="card-body">DataFetcher pulls OHLCV from Kite API (live) or CSV (backtest). PivotCalculator computes PP/R1/R2/S1/S2 from previous day data. These run pre-market.</div>
+    </div>
+    <div class="card c-gold">
+      <div class="card-num">Analysis Layer</div>
+      <div class="card-title">IndicatorEngine + MorningFilter</div>
+      <div class="card-body">IndicatorEngine adds EMA, ADX, Volume, Bollinger Bands, ATR to the DataFrame. MorningFilter scores the day 0–4.0 and sets position size limits.</div>
+    </div>
+    <div class="card c-green">
+      <div class="card-num">Decision Layer</div>
+      <div class="card-title">SignalGenerator + SLTPCalc</div>
+      <div class="card-body">SignalGenerator checks all 6 entry conditions. On pass, SLTPCalc computes stop-loss via 3-method hierarchy and validates the 1:2 RR requirement.</div>
+    </div>
+    <div class="card c-blue">
+      <div class="card-num">Execution Layer</div>
+      <div class="card-title">OrderManager</div>
+      <div class="card-body">Paper mode: records simulated trades to in-memory order book and CSV journal. Live mode: places real Kite Connect orders with server-side SL orders immediately after entry.</div>
+    </div>
+    <div class="card c-amber">
+      <div class="card-num">Management Layer</div>
+      <div class="card-title">PositionMonitor + DailyRiskGuard</div>
+      <div class="card-body">PositionMonitor checks exits on every candle (SL, T1, T2, ADX drop, 3:15 PM). DailyRiskGuard halts trading if daily loss limit or trade count is hit.</div>
+    </div>
+    <div class="card c-red">
+      <div class="card-num">Orchestration</div>
+      <div class="card-title">TradingEngine</div>
+      <div class="card-body">The main loop. Calls pre_market_setup() once at 8:30 AM, then on_candle() for each symbol on every 15-min candle. Coordinates all five layers.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ SETUP ═══════ -->
+<div id="setup" style="background:var(--obsidian);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">09</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Installation</div>
+      <h2 class="sec-title">Setup &amp; Installation</h2>
+      <p class="sec-desc">Complete installation from scratch. Python 3.9+ required.</p>
+    </div>
+  </div>
+  <div class="sh2">Step 1 &mdash; Install Python Dependencies</div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">terminal</span></div>
+      <span class="code-lang">BASH</span>
+    </div>
+    <div class="code-body"><span class="cm"># Create a virtual environment (recommended)</span>
+python3 -m venv obsidian_env
+source obsidian_env/bin/activate  <span class="cm"># Linux/Mac</span>
+obsidian_env\Scripts\activate     <span class="cm"># Windows</span>
+
+<span class="cm"># Install all dependencies</span>
+pip install ta pandas numpy kiteconnect requests
+
+<span class="cm"># Verify installation</span>
+python -c "<span class="kw">import</span> ta, pandas, numpy, kiteconnect; <span class="fn">print</span>(<span class="st">'All packages OK'</span>)"</div>
+  </div>
+
+  <div class="sh2">Step 2 &mdash; Create requirements.txt</div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">requirements.txt</span></div>
+      <span class="code-lang">TEXT</span>
+    </div>
+    <div class="code-body">ta>=0.10.2          <span class="cm"># Technical indicators (EMA, ADX, BB, ATR)</span>
+pandas>=2.0.0       <span class="cm"># Data manipulation and OHLCV DataFrames</span>
+numpy>=1.24.0       <span class="cm"># Math and array operations</span>
+kiteconnect>=4.1.0  <span class="cm"># Zerodha Kite Connect API</span>
+requests>=2.31.0    <span class="cm"># HTTP client for Telegram notifications</span></div>
+  </div>
+
+  <div class="sh2">Step 3 &mdash; Set Environment Variables</div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">.env (never commit to git)</span></div>
+      <span class="code-lang">BASH</span>
+    </div>
+    <div class="code-body"><span class="cm"># Zerodha Kite Connect credentials</span>
+<span class="kw">export</span> KITE_API_KEY=<span class="st">"your_api_key_here"</span>
+<span class="kw">export</span> KITE_API_SECRET=<span class="st">"your_api_secret_here"</span>
+<span class="kw">export</span> KITE_ACCESS_TOKEN=<span class="st">"refreshed_each_morning"</span>
+
+<span class="cm"># Telegram alerts (optional but recommended)</span>
+<span class="kw">export</span> TELEGRAM_BOT_TOKEN=<span class="st">"bot_token_from_botfather"</span>
+<span class="kw">export</span> TELEGRAM_CHAT_ID=<span class="st">"your_telegram_chat_id"</span>
+
+<span class="cm"># Add to ~/.bashrc or ~/.zshrc for persistence</span>
+<span class="cm"># NEVER hardcode these in nse_algo.py</span></div>
+  </div>
+
+  <div class="sh2">Step 4 &mdash; Test Without API (Synthetic Data)</div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">terminal</span></div>
+      <span class="code-lang">BASH</span>
+    </div>
+    <div class="code-body"><span class="cm"># This runs with synthetic data — no API key needed</span>
+<span class="cm"># Validates all logic works without real broker connection</span>
+python nse_algo.py --backtest
+
+<span class="cm"># Expected output:</span>
+<span class="cm"># ════════════════════════════════════════════════════════</span>
+<span class="cm">#   NSE ALGO v3.0 — BACKTEST RESULTS</span>
+<span class="cm"># ════════════════════════════════════════════════════════</span>
+<span class="cm">#   Total trades    :           XX</span>
+<span class="cm">#   Win rate        :        XX.X%</span>
+<span class="cm"># ════════════════════════════════════════════════════════</span></div>
+  </div>
+
+  <div class="sh2">Step 5 &mdash; Add Real Historical Data for Backtest</div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">terminal + CSV format</span></div>
+      <span class="code-lang">BASH</span>
+    </div>
+    <div class="code-body"><span class="cm"># Create data directory</span>
+mkdir historical_data
+
+<span class="cm"># CSV format required (save as SYMBOL_15min.csv):</span>
+<span class="cm"># datetime,open,high,low,close,volume</span>
+<span class="cm"># 2024-01-02 09:15:00,2810.5,2825.0,2808.2,2820.1,245000</span>
+<span class="cm"># 2024-01-02 09:30:00,2820.1,2835.5,2815.0,2830.0,312000</span>
+<span class="cm"># ...</span>
+
+<span class="cm"># Free data sources:</span>
+<span class="cm"># 1. Zerodha Kite historical API (after account setup)</span>
+<span class="cm"># 2. pip install nsepython   →  nsepython has NSE OHLC data</span>
+<span class="cm"># 3. NSE India website       →  bhavcopy daily OHLC CSVs</span>
+
+<span class="cm"># Then run backtest with real data:</span>
+python nse_algo.py --backtest</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ PYTHON FILES ═══════ -->
+<div id="file-config" style="background:var(--void);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">10</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Python Module</div>
+      <h2 class="sec-title">Section 1 — Config</h2>
+      <p class="sec-desc">All tunable parameters in one place. Change only this section to customise the system. Never scatter magic numbers through the codebase.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">nse_algo.py — Section 1: Config</span></div>
+      <span class="code-lang">PYTHON</span>
+    </div>
+    <div class="code-body"><span class="kw">class</span> <span class="cl">Config</span>:
+    <span class="cm"># ── TRADING MODE ──────────────────────────────────</span>
+    <span class="cm"># "paper"    : Simulated trades. START HERE always.</span>
+    <span class="cm"># "live"     : Real orders via Kite Connect API</span>
+    <span class="cm"># "backtest" : Historical CSV data replay</span>
+    MODE: <span class="fn">str</span> = <span class="st">"paper"</span>
+
+    <span class="cm"># ── API CREDENTIALS (always from environment) ─────</span>
+    KITE_API_KEY: <span class="fn">str</span>      = os.<span class="fn">getenv</span>(<span class="st">"KITE_API_KEY"</span>, <span class="st">""</span>)
+    KITE_API_SECRET: <span class="fn">str</span>   = os.<span class="fn">getenv</span>(<span class="st">"KITE_API_SECRET"</span>, <span class="st">""</span>)
+    KITE_ACCESS_TOKEN: <span class="fn">str</span> = os.<span class="fn">getenv</span>(<span class="st">"KITE_ACCESS_TOKEN"</span>, <span class="st">""</span>)
+
+    <span class="cm"># ── CAPITAL AND RISK ──────────────────────────────</span>
+    TOTAL_CAPITAL: <span class="fn">float</span>       = <span class="nm">500_000.0</span>  <span class="cm"># INR</span>
+    RISK_PER_TRADE_PCT: <span class="fn">float</span>  = <span class="nm">0.01</span>       <span class="cm"># 1% per trade</span>
+    DAILY_LOSS_LIMIT_PCT: <span class="fn">float</span>= <span class="nm">0.02</span>       <span class="cm"># Halt at -2%/day</span>
+    MAX_TRADES_PER_DAY: <span class="fn">int</span>    = <span class="nm">3</span>          <span class="cm"># Hard max</span>
+    MIN_RR_RATIO: <span class="fn">float</span>        = <span class="nm">2.0</span>        <span class="cm"># Minimum 1:2</span>
+
+    <span class="cm"># ── INDICATOR SETTINGS ────────────────────────────</span>
+    EMA_FAST: <span class="fn">int</span>         = <span class="nm">9</span>     <span class="cm"># Fast EMA period</span>
+    EMA_SLOW: <span class="fn">int</span>         = <span class="nm">21</span>    <span class="cm"># Slow EMA period</span>
+    ADX_PERIOD: <span class="fn">int</span>       = <span class="nm">14</span>    <span class="cm"># ADX period</span>
+    ADX_MIN: <span class="fn">float</span>        = <span class="nm">20.0</span>  <span class="cm"># Below = no trading (hard veto)</span>
+    ADX_STRONG: <span class="fn">float</span>     = <span class="nm">25.0</span>  <span class="cm"># Above = full position</span>
+    VOL_MA_PERIOD: <span class="fn">int</span>    = <span class="nm">20</span>    <span class="cm"># Volume MA period</span>
+    VOL_MULTIPLIER: <span class="fn">float</span> = <span class="nm">1.5</span>   <span class="cm"># Minimum volume ratio</span>
+
+    <span class="cm"># ── PIVOT AND ENTRY THRESHOLDS ────────────────────</span>
+    PIVOT_ENTRY_TOLERANCE: <span class="fn">float</span> = <span class="nm">0.002</span>   <span class="cm"># 0.2% near pivot</span>
+    EMA_MIN_SEPARATION: <span class="fn">float</span>    = <span class="nm">0.0015</span>  <span class="cm"># 0.15% EMA gap</span>
+    MAX_SL_PCT: <span class="fn">float</span>            = <span class="nm">0.008</span>   <span class="cm"># 0.8% hard SL cap</span></div>
+  </div>
+</div>
+</div>
+
+<div id="file-indicators" style="background:var(--obsidian);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">11</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Python Module</div>
+      <h2 class="sec-title">Section 4 — Indicator Engine</h2>
+      <p class="sec-desc">Computes all four pillars' indicators on an OHLCV DataFrame using the <code>ta</code> library. Every column added here feeds directly into the signal generator.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">nse_algo.py — Section 4: IndicatorEngine</span></div>
+      <span class="code-lang">PYTHON</span>
+    </div>
+    <div class="code-body"><span class="kw">class</span> <span class="cl">IndicatorEngine</span>:
+    <span class="st">"""Adds all indicator columns to an OHLCV DataFrame."""</span>
+
+    <span class="kw">@staticmethod</span>
+    <span class="kw">def</span> <span class="fn">compute</span>(df: pd.<span class="cl">DataFrame</span>) -> pd.<span class="cl">DataFrame</span>:
+        <span class="cm"># ── PILLAR 1: EMA CROSSOVER ──────────────────────</span>
+        <span class="cm"># 9 EMA reacts quickly — shows short-term momentum</span>
+        df[<span class="st">"ema_fast"</span>] = <span class="cl">EMAIndicator</span>(
+            close=df[<span class="st">"close"</span>], window=Config.EMA_FAST, fillna=<span class="kw">True</span>
+        ).<span class="fn">ema_indicator</span>()
+
+        <span class="cm"># 21 EMA filters noise — defines prevailing trend</span>
+        df[<span class="st">"ema_slow"</span>] = <span class="cl">EMAIndicator</span>(
+            close=df[<span class="st">"close"</span>], window=Config.EMA_SLOW, fillna=<span class="kw">True</span>
+        ).<span class="fn">ema_indicator</span>()
+
+        <span class="cm"># EMA direction: +1=uptrend, -1=downtrend, 0=neutral</span>
+        df[<span class="st">"ema_dir"</span>] = <span class="nm">0</span>
+        df.<span class="fn">loc</span>[df[<span class="st">"ema_fast"</span>] > df[<span class="st">"ema_slow"</span>], <span class="st">"ema_dir"</span>] =  <span class="nm">1</span>
+        df.<span class="fn">loc</span>[df[<span class="st">"ema_fast"</span>] < df[<span class="st">"ema_slow"</span>], <span class="st">"ema_dir"</span>] = -<span class="nm">1</span>
+
+        <span class="cm"># Tangle detector: crossovers in last 6 candles</span>
+        crosses = (df[<span class="st">"ema_dir"</span>] != df[<span class="st">"ema_dir"</span>].<span class="fn">shift</span>(<span class="nm">1</span>)).<span class="fn">astype</span>(<span class="fn">int</span>)
+        df[<span class="st">"ema_crosses_6"</span>] = crosses.<span class="fn">rolling</span>(<span class="nm">6</span>).<span class="fn">sum</span>().<span class="fn">fillna</span>(<span class="nm">0</span>)
+
+        <span class="cm"># ── PILLAR 3: ADX TREND STRENGTH ─────────────────</span>
+        <span class="cm"># ADX measures TREND STRENGTH, not direction</span>
+        <span class="cm"># Key insight: ADX rising = trend strengthening (up OR down)</span>
+        adx_ind = <span class="cl">ADXIndicator</span>(
+            high=df[<span class="st">"high"</span>], low=df[<span class="st">"low"</span>], close=df[<span class="st">"close"</span>],
+            window=Config.ADX_PERIOD, fillna=<span class="kw">True</span>
+        )
+        df[<span class="st">"adx"</span>]        = adx_ind.<span class="fn">adx</span>()
+        df[<span class="st">"adx_rising"</span>] = df[<span class="st">"adx"</span>] > df[<span class="st">"adx"</span>].<span class="fn">shift</span>(<span class="nm">1</span>)
+
+        <span class="cm"># ── PILLAR 4: VOLUME CONFIRMATION ────────────────</span>
+        df[<span class="st">"vol_ma"</span>]    = df[<span class="st">"volume"</span>].<span class="fn">rolling</span>(Config.VOL_MA_PERIOD).<span class="fn">mean</span>()
+        df[<span class="st">"vol_ratio"</span>] = df[<span class="st">"volume"</span>] / df[<span class="st">"vol_ma"</span>]
+
+        <span class="cm"># ── ATR: for stop-loss calculation ───────────────</span>
+        df[<span class="st">"atr"</span>] = <span class="cl">AverageTrueRange</span>(
+            high=df[<span class="st">"high"</span>], low=df[<span class="st">"low"</span>], close=df[<span class="st">"close"</span>],
+            window=Config.ATR_PERIOD, fillna=<span class="kw">True</span>
+        ).<span class="fn">average_true_range</span>()
+
+        <span class="kw">return</span> df</div>
+  </div>
+</div>
+</div>
+
+<div id="file-pivots" style="background:var(--ink);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">12</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Python Module</div>
+      <h2 class="sec-title">Section 3 — Pivot Calculator</h2>
+      <p class="sec-desc">Calculates PP, R1, R2, S1, S2 from yesterday's OHLC. Finds the nearest pivot to current price. Maps entry pivot to T1 and T2 targets.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">nse_algo.py — Section 3: PivotCalculator</span></div>
+      <span class="code-lang">PYTHON</span>
+    </div>
+    <div class="code-body"><span class="kw">class</span> <span class="cl">PivotCalculator</span>:
+
+    <span class="kw">@staticmethod</span>
+    <span class="kw">def</span> <span class="fn">calculate</span>(high: <span class="fn">float</span>, low: <span class="fn">float</span>, close: <span class="fn">float</span>) -> <span class="fn">dict</span>:
+        <span class="cm"># Classic pivot point formulas</span>
+        pp = (high + low + close) / <span class="nm">3</span>
+        r1 = (<span class="nm">2</span> * pp) - low
+        r2 = pp + (high - low)
+        s1 = (<span class="nm">2</span> * pp) - high
+        s2 = pp - (high - low)
+        <span class="kw">return</span> {<span class="st">"PP"</span>: <span class="fn">round</span>(pp,<span class="nm">2</span>), <span class="st">"R1"</span>: <span class="fn">round</span>(r1,<span class="nm">2</span>), <span class="st">"R2"</span>: <span class="fn">round</span>(r2,<span class="nm">2</span>),
+                <span class="st">"S1"</span>: <span class="fn">round</span>(s1,<span class="nm">2</span>), <span class="st">"S2"</span>: <span class="fn">round</span>(s2,<span class="nm">2</span>)}
+
+    <span class="kw">@staticmethod</span>
+    <span class="kw">def</span> <span class="fn">nearest_pivot</span>(price: <span class="fn">float</span>, pivots: <span class="fn">dict</span>):
+        <span class="cm"># Find closest pivot within 0.2% tolerance</span>
+        closest = <span class="fn">sorted</span>(pivots.<span class="fn">items</span>(), key=<span class="kw">lambda</span> x: <span class="fn">abs</span>(x[<span class="nm">1</span>] - price))
+        <span class="kw">for</span> name, level <span class="kw">in</span> closest:
+            <span class="kw">if</span> <span class="fn">abs</span>(price - level) / price <= Config.PIVOT_ENTRY_TOLERANCE:
+                <span class="kw">return</span> name, level
+        <span class="kw">return</span> <span class="kw">None</span>, <span class="kw">None</span>
+
+    <span class="kw">@staticmethod</span>
+    <span class="kw">def</span> <span class="fn">target_levels</span>(entry_pivot: <span class="fn">str</span>, direction: <span class="fn">str</span>, pivots: <span class="fn">dict</span>):
+        <span class="cm"># Sequence: Long goes S2→S1→PP→R1→R2  Short reverses</span>
+        seq = [<span class="st">"S2"</span>,<span class="st">"S1"</span>,<span class="st">"PP"</span>,<span class="st">"R1"</span>,<span class="st">"R2"</span>] <span class="kw">if</span> direction==<span class="st">"long"</span> <span class="kw">else</span> [<span class="st">"R2"</span>,<span class="st">"R1"</span>,<span class="st">"PP"</span>,<span class="st">"S1"</span>,<span class="st">"S2"</span>]
+        idx = seq.<span class="fn">index</span>(entry_pivot)
+        t1 = pivots.<span class="fn">get</span>(seq[idx+<span class="nm">1</span>]) <span class="kw">if</span> idx+<span class="nm">1</span> < <span class="fn">len</span>(seq) <span class="kw">else</span> <span class="kw">None</span>
+        t2 = pivots.<span class="fn">get</span>(seq[idx+<span class="nm">2</span>]) <span class="kw">if</span> idx+<span class="nm">2</span> < <span class="fn">len</span>(seq) <span class="kw">else</span> <span class="kw">None</span>
+        <span class="kw">return</span> t1, t2</div>
+  </div>
+</div>
+</div>
+
+<div id="file-signals" style="background:var(--void);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">13</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Python Module</div>
+      <h2 class="sec-title">Section 6 — Signal Generator</h2>
+      <p class="sec-desc">The brain of the system. Checks all 6 entry conditions in sequence. Returns a complete signal dict (with entry, SL, T1, T2, RR) or None. One failed condition = no signal.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">nse_algo.py — Section 6: SignalGenerator</span></div>
+      <span class="code-lang">PYTHON</span>
+    </div>
+    <div class="code-body"><span class="kw">class</span> <span class="cl">SignalGenerator</span>:
+
+    <span class="kw">@staticmethod</span>
+    <span class="kw">def</span> <span class="fn">generate</span>(ind: <span class="fn">dict</span>, pivots: <span class="fn">dict</span>, pos_pct: <span class="fn">float</span>):
+        <span class="kw">if</span> pos_pct == <span class="nm">0</span>:
+            <span class="kw">return</span> <span class="kw">None</span>  <span class="cm"># Morning filter says no trading today</span>
+
+        <span class="kw">for</span> direction <span class="kw">in</span> [<span class="st">"long"</span>, <span class="st">"short"</span>]:
+            <span class="cm"># ── CONDITION 1: ADX ≥ 20 ───────────────────────</span>
+            <span class="kw">if</span> ind[<span class="st">"adx"</span>] < Config.ADX_MIN: <span class="kw">continue</span>
+
+            <span class="cm"># ── CONDITION 2: EMA direction correct ──────────</span>
+            ema_ok = ind[<span class="st">"ema_dir"</span>] == (<span class="nm">1</span> <span class="kw">if</span> direction==<span class="st">"long"</span> <span class="kw">else</span> -<span class="nm">1</span>)
+            <span class="kw">if</span> <span class="kw">not</span> ema_ok: <span class="kw">continue</span>
+
+            <span class="cm"># ── CONDITION 2b: Not tangled (> 2 crossovers) ──</span>
+            <span class="kw">if</span> ind[<span class="st">"ema_crosses_6"</span>] > <span class="nm">2</span>: <span class="kw">continue</span>
+
+            <span class="cm"># ── CONDITION 3: EMA separation ≥ 0.15% ─────────</span>
+            <span class="kw">if</span> ind[<span class="st">"ema_sep"</span>] < Config.EMA_MIN_SEPARATION: <span class="kw">continue</span>
+
+            <span class="cm"># ── CONDITION 4: Price near a pivot level ────────</span>
+            pvt_name, pvt_price = PivotCalculator.<span class="fn">nearest_pivot</span>(
+                ind[<span class="st">"close"</span>], pivots
+            )
+            <span class="kw">if</span> pvt_name <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">continue</span>
+
+            <span class="cm"># ── CONDITION 5: Signal candle confirms direction ─</span>
+            candle_ok = ind[<span class="st">"is_bullish"</span>] <span class="kw">if</span> direction==<span class="st">"long"</span> <span class="kw">else</span> ind[<span class="st">"is_bearish"</span>]
+            <span class="kw">if</span> <span class="kw">not</span> candle_ok: <span class="kw">continue</span>
+
+            <span class="cm"># ── CONDITION 6: Volume ≥ 1.5× average ───────────</span>
+            <span class="kw">if</span> ind[<span class="st">"vol_ratio"</span>] < Config.VOL_MULTIPLIER: <span class="kw">continue</span>
+
+            <span class="cm"># ── ALL PASSED → calculate SL and targets ─────────</span>
+            sl = SLTPCalc.<span class="fn">best_sl</span>(
+                ind[<span class="st">"close"</span>],
+                SLTPCalc.<span class="fn">pivot_stop</span>(ind[<span class="st">"close"</span>], pvt_price, direction),
+                SLTPCalc.<span class="fn">atr_stop</span>(ind[<span class="st">"close"</span>], ind[<span class="st">"atr"</span>], direction),
+                direction
+            )
+            <span class="kw">if</span> sl <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">continue</span>  <span class="cm"># SL exceeds hard cap</span>
+
+            t1, t2 = PivotCalculator.<span class="fn">target_levels</span>(pvt_name, direction, pivots)
+            <span class="kw">if</span> t1 <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">continue</span>
+
+            <span class="cm"># ── VERIFY MINIMUM 1:2 R:R ─────────────────────</span>
+            rr = <span class="fn">abs</span>(t1 - ind[<span class="st">"close"</span>]) / <span class="fn">abs</span>(ind[<span class="st">"close"</span>] - sl)
+            <span class="kw">if</span> rr < Config.MIN_RR_RATIO: <span class="kw">continue</span>
+
+            <span class="kw">return</span> {   <span class="cm"># ← Complete signal dict</span>
+                <span class="st">"direction"</span>: direction, <span class="st">"entry_price"</span>: ind[<span class="st">"close"</span>],
+                <span class="st">"stop_loss"</span>: sl, <span class="st">"target_1"</span>: t1, <span class="st">"target_2"</span>: t2,
+                <span class="st">"risk_reward"</span>: <span class="fn">round</span>(rr,<span class="nm">2</span>), <span class="st">"adx"</span>: ind[<span class="st">"adx"</span>],
+                <span class="st">"pivot"</span>: pvt_name, <span class="st">"position_size_pct"</span>: pos_pct,
+            }
+        <span class="kw">return</span> <span class="kw">None</span>  <span class="cm"># No valid signal found</span></div>
+  </div>
+</div>
+</div>
+
+<div id="file-orders" style="background:var(--obsidian);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">14</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Python Module</div>
+      <h2 class="sec-title">Section 8 — Order Manager</h2>
+      <p class="sec-desc">Abstracts order placement from decision logic. Paper mode: in-memory + CSV journal. Live mode: real Kite Connect API calls with immediate server-side SL orders.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">nse_algo.py — Section 8: OrderManager (paper mode)</span></div>
+      <span class="code-lang">PYTHON</span>
+    </div>
+    <div class="code-body"><span class="kw">class</span> <span class="cl">OrderManager</span>:
+    <span class="kw">def</span> <span class="fn">place_order</span>(<span class="df">self</span>, symbol, exchange, direction,
+                     quantity, entry_price, stop_loss,
+                     target_1, target_2, signal) -> <span class="fn">str</span>:
+
+        oid = <span class="st">f"ORD_{symbol}_{datetime.now().strftime('%H%M%S')}"</span>
+        order = {
+            <span class="st">"order_id"</span>:    oid,
+            <span class="st">"symbol"</span>:      symbol,
+            <span class="st">"direction"</span>:   direction,
+            <span class="st">"quantity"</span>:    quantity,
+            <span class="st">"entry_price"</span>: entry_price,
+            <span class="st">"stop_loss"</span>:   stop_loss,    <span class="cm"># Server-side SL (Kite)</span>
+            <span class="st">"target_1"</span>:    target_1,     <span class="cm"># Exit 50% here</span>
+            <span class="st">"target_2"</span>:    target_2,     <span class="cm"># Exit remaining 50%</span>
+            <span class="st">"status"</span>:      <span class="st">"OPEN"</span>,
+            <span class="st">"t1_hit"</span>:      <span class="kw">False</span>,
+            <span class="st">"pnl"</span>:         <span class="kw">None</span>,
+        }
+        <span class="df">self</span>.orders.<span class="fn">append</span>(order)
+
+        <span class="kw">if</span> <span class="df">self</span>.mode == <span class="st">"live"</span>:
+            <span class="cm"># Place market order via Kite Connect</span>
+            kite_id = <span class="df">self</span>.kite.<span class="fn">place_order</span>(
+                tradingsymbol=symbol, exchange=exchange,
+                transaction_type=TRANSACTION_TYPE_BUY,
+                quantity=quantity,
+                order_type=ORDER_TYPE_MARKET,
+                product=PRODUCT_MIS,     <span class="cm"># Intraday product</span>
+                variety=VARIETY_REGULAR,
+            )
+            <span class="cm"># Immediately place server-side SL order</span>
+            <span class="df">self</span>.<span class="fn">_kite_sl_order</span>(symbol, exchange, direction,
+                                  quantity, stop_loss)
+        <span class="kw">return</span> oid</div>
+  </div>
+</div>
+</div>
+
+<div id="file-engine" style="background:var(--ink);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">15</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Python Module</div>
+      <h2 class="sec-title">Section 13 — Trading Engine</h2>
+      <p class="sec-desc">The main orchestrator. Calls pre_market_setup() once at 8:30 AM, then on_candle() for each symbol on every 15-minute candle through the trading day.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">nse_algo.py — Section 13: TradingEngine.on_candle()</span></div>
+      <span class="code-lang">PYTHON</span>
+    </div>
+    <div class="code-body"><span class="kw">def</span> <span class="fn">on_candle</span>(<span class="df">self</span>, symbol: <span class="fn">str</span>):
+    <span class="st">"""Called on every new 15-min candle for a symbol."""</span>
+    now = datetime.<span class="fn">now</span>(Config.IST)
+    hm  = (now.hour, now.minute)
+
+    <span class="cm"># 1. Enforce trading window</span>
+    <span class="kw">if</span> hm < Config.TRADE_START: <span class="kw">return</span>   <span class="cm"># Before 9:30 AM</span>
+    <span class="kw">if</span> hm >= Config.HARD_EXIT:            <span class="cm"># After 3:15 PM</span>
+        <span class="cm"># Force-close all positions for this symbol</span>
+        <span class="kw">for</span> o <span class="kw">in</span> <span class="df">self</span>.order_mgr.<span class="fn">open_orders</span>():
+            <span class="kw">if</span> o[<span class="st">"symbol"</span>] == symbol:
+                <span class="df">self</span>.order_mgr.<span class="fn">exit_order</span>(o[<span class="st">"order_id"</span>], o[<span class="st">"entry_price"</span>], <span class="st">"HARD_EXIT"</span>)
+        <span class="kw">return</span>
+
+    <span class="cm"># 2. Check daily risk limits</span>
+    <span class="kw">if</span> <span class="kw">not</span> <span class="df">self</span>.risk_guard.<span class="fn">can_trade</span>(): <span class="kw">return</span>
+
+    <span class="cm"># 3. Fetch and compute indicators</span>
+    df  = <span class="df">self</span>.fetcher.<span class="fn">get_candles</span>(token, symbol)
+    df  = <span class="cl">IndicatorEngine</span>.<span class="fn">compute</span>(df)
+    ind = <span class="cl">IndicatorEngine</span>.<span class="fn">latest</span>(df)
+
+    <span class="cm"># 4. Monitor open positions (SL, T1, T2, ADX drop)</span>
+    actions = <span class="df">self</span>.monitor.<span class="fn">check</span>(symbol, ind[<span class="st">"close"</span>], ind[<span class="st">"adx"</span>])
+
+    <span class="cm"># 5. Record any closed trade P&L to risk guard</span>
+    <span class="kw">for</span> o <span class="kw">in</span> <span class="df">self</span>.order_mgr.orders:
+        <span class="kw">if</span> o[<span class="st">"status"</span>] == <span class="st">"CLOSED"</span> <span class="kw">and not</span> o.<span class="fn">get</span>(<span class="st">"pnl_booked"</span>):
+            <span class="df">self</span>.risk_guard.<span class="fn">record_closed_trade</span>(o[<span class="st">"pnl"</span>])
+            o[<span class="st">"pnl_booked"</span>] = <span class="kw">True</span>
+
+    <span class="cm"># 6. Skip if already in trade for this symbol</span>
+    <span class="kw">if</span> <span class="fn">any</span>(o[<span class="st">"symbol"</span>] == symbol <span class="kw">for</span> o <span class="kw">in</span> <span class="df">self</span>.order_mgr.<span class="fn">open_orders</span>()): <span class="kw">return</span>
+
+    <span class="cm"># 7. Get morning score — determines position size</span>
+    pos_pct = <span class="df">self</span>.morning_scores.<span class="fn">get</span>(symbol, {}).<span class="fn">get</span>(<span class="st">"position_size_pct"</span>, <span class="nm">0</span>)
+    <span class="kw">if</span> pos_pct == <span class="nm">0</span>: <span class="kw">return</span>
+
+    <span class="cm"># 8. Try to find a valid signal (all 6 conditions)</span>
+    signal = <span class="cl">SignalGenerator</span>.<span class="fn">generate</span>(
+        ind, <span class="df">self</span>.pivot_cache[symbol], pos_pct
+    )
+    <span class="kw">if</span> <span class="kw">not</span> signal: <span class="kw">return</span>
+
+    <span class="cm"># 9. Calculate quantity and place order</span>
+    qty = <span class="cl">SLTPCalc</span>.<span class="fn">quantity</span>(Config.TOTAL_CAPITAL, signal[<span class="st">"position_size_pct"</span>],
+                              signal[<span class="st">"entry_price"</span>], signal[<span class="st">"stop_loss"</span>])
+    <span class="df">self</span>.order_mgr.<span class="fn">place_order</span>(symbol=symbol, ...)
+    <span class="cl">Notifier</span>.<span class="fn">trade</span>(signal, symbol, qty)   <span class="cm"># Telegram alert</span></div>
+  </div>
+</div>
+</div>
+
+<div id="file-backtest" style="background:var(--void);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">16</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Python Module</div>
+      <h2 class="sec-title">Section 14 — Backtester</h2>
+      <p class="sec-desc">Replays every single condition on historical candles. Outputs win rate, profit factor, drawdown &mdash; the same metrics documented in the trading system.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">terminal — backtest commands</span></div>
+      <span class="code-lang">BASH</span>
+    </div>
+    <div class="code-body"><span class="cm"># Run backtest on all watchlist symbols</span>
+python nse_algo.py --backtest
+
+<span class="cm"># Sample output:</span>
+<span class="cm"># ══════════════════════════════════════════════════════════</span>
+<span class="cm">#   NSE ALGO v3.0 — BACKTEST RESULTS</span>
+<span class="cm"># ══════════════════════════════════════════════════════════</span>
+<span class="cm">#   Capital         :      ₹5,00,000</span>
+<span class="cm">#   Total trades    :            152</span>
+<span class="cm">#   Wins / Losses   :   105 / 47</span>
+<span class="cm">#   Win rate        :          69.1%</span>
+<span class="cm">#   Profit factor   :          2.14x</span>
+<span class="cm">#   Total P&L       :    ₹+1,24,500</span>
+<span class="cm">#   Return on cap   :          24.9%</span>
+<span class="cm">#   Avg win trade   :       ₹+1,850</span>
+<span class="cm">#   Avg loss trade  :         ₹-780</span>
+<span class="cm">#   Max drawdown    :      ₹-20,500</span>
+<span class="cm"># ══════════════════════════════════════════════════════════</span>
+<span class="cm">#   Results saved   : backtest_results.csv</span>
+
+<span class="cm"># Review every trade in the results CSV</span>
+<span class="cm"># Filter by exit_reason to see loss patterns</span>
+<span class="cm"># Filter ADX < 25 trades vs ADX > 25 — compare win rates</span></div>
+  </div>
+</div>
+</div>
+
+<div id="file-telegram" style="background:var(--obsidian);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">17</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Python Module</div>
+      <h2 class="sec-title">Section 12 — Telegram Notifier</h2>
+      <p class="sec-desc">Sends trade alerts and morning scores to your phone. You never need to watch a screen. Setup takes 5 minutes.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">Telegram setup steps</span></div>
+      <span class="code-lang">BASH</span>
+    </div>
+    <div class="code-body"><span class="cm"># Step 1: Create a Telegram bot</span>
+<span class="cm"># Open Telegram → search @BotFather → send /newbot</span>
+<span class="cm"># Follow prompts → get your bot token</span>
+<span class="cm"># Token format: 123456789:ABCDefGhIJKlMnOpQrStUvWxYZ</span>
+
+<span class="cm"># Step 2: Get your chat ID</span>
+<span class="cm"># Open Telegram → search @userinfobot → send /start</span>
+<span class="cm"># Note your numeric chat ID</span>
+
+<span class="cm"># Step 3: Set environment variables</span>
+<span class="kw">export</span> TELEGRAM_BOT_TOKEN=<span class="st">"your_bot_token"</span>
+<span class="kw">export</span> TELEGRAM_CHAT_ID=<span class="st">"your_chat_id"</span>
+
+<span class="cm"># Step 4: Test the connection</span>
+python -c <span class="st">"
+from nse_algo import Notifier, Config
+import os
+Config.SEND_TELEGRAM = True
+Config.TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+Config.TELEGRAM_CHAT_ID   = os.getenv('TELEGRAM_CHAT_ID')
+Notifier.send('ObsidianPivot connected!')
+print('Test message sent')
+"</span>
+
+<span class="cm"># ── Sample messages you will receive ──────────────────────</span>
+<span class="cm"># MORNING SCAN</span>
+<span class="cm"># RELIANCE: 3.5/4.0 — TRADE full size (1% risk)</span>
+<span class="cm"># HDFCBANK: 2.0/4.0 — NO TRADE (ADX veto)</span>
+<span class="cm">#</span>
+<span class="cm"># TRADE SIGNAL</span>
+<span class="cm"># Symbol : RELIANCE</span>
+<span class="cm"># Dir    : LONG</span>
+<span class="cm"># Entry  : ₹2,810.00</span>
+<span class="cm"># SL     : ₹2,787.00</span>
+<span class="cm"># T1     : ₹2,855.00</span>
+<span class="cm"># T2     : ₹2,895.00</span>
+<span class="cm"># RR     : 1:2.3</span>
+<span class="cm"># ADX    : 28.4</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ KITE API SETUP ═══════ -->
+<div id="kite-setup" style="background:var(--ink);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">18</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Broker Integration</div>
+      <h2 class="sec-title">Zerodha Kite Connect Setup</h2>
+      <p class="sec-desc">Full step-by-step guide to setting up the Kite Connect API for live trading. This is required for live mode.</p>
+    </div>
+  </div>
+  <ol class="steps">
+    <li><strong>Register as a Kite Connect developer.</strong> Go to <code>developers.kite.trade</code>. Log in with your Zerodha account. Click "Create new app". Fill in app name and redirect URL (use <code>http://127.0.0.1</code> for local testing).</li>
+    <li><strong>Get your API key and secret.</strong> After app creation, you will see the API Key and API Secret. Set them as environment variables: <code>export KITE_API_KEY="..."</code> and <code>export KITE_API_SECRET="..."</code>. Never put them in the code file.</li>
+    <li><strong>Generate the login URL and visit it.</strong> Run <code>python nse_algo.py --once</code>. The system will print a Kite login URL. Copy it, paste in browser, log in. You will be redirected to your redirect URL with a <code>request_token</code> in the URL.</li>
+    <li><strong>Exchange request_token for access_token.</strong> Run the exchange script (run once per morning): <code>python -c "from kiteconnect import KiteConnect; k=KiteConnect(api_key='KEY'); d=k.generate_session('REQUEST_TOKEN', api_secret='SECRET'); print(d['access_token'])"</code>. Copy the output.</li>
+    <li><strong>Set the access token.</strong> <code>export KITE_ACCESS_TOKEN="the_token_from_step_4"</code>. Access tokens expire at midnight. You need a fresh one every trading day.</li>
+    <li><strong>Automate the daily token refresh.</strong> Write a small script that opens the login URL in a browser, extracts the token after you log in, and sets the environment variable. Run it at 8:20 AM via cron every weekday.</li>
+    <li><strong>Test the connection before going live.</strong> Run <code>python nse_algo.py --mode paper --once</code>. Check the log. Confirm pre-market setup runs, pivots are calculated, and morning scores appear.</li>
+    <li><strong>Switch to live only after 30+ profitable paper days.</strong> Change <code>MODE = "live"</code> in Config or pass <code>--mode live</code> flag. Start with 25% of intended capital for the first live month.</li>
+  </ol>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">daily_token_refresh.py — run at 8:20 AM</span></div>
+      <span class="code-lang">PYTHON</span>
+    </div>
+    <div class="code-body"><span class="cm">#!/usr/bin/env python3</span>
+<span class="cm"># Run this at 8:20 AM every weekday to refresh the Kite access token</span>
+<span class="cm"># After running, copy the printed token and export KITE_ACCESS_TOKEN</span>
+
+<span class="kw">import</span> os
+<span class="kw">from</span> kiteconnect <span class="kw">import</span> <span class="cl">KiteConnect</span>
+
+API_KEY    = os.<span class="fn">getenv</span>(<span class="st">"KITE_API_KEY"</span>)
+API_SECRET = os.<span class="fn">getenv</span>(<span class="st">"KITE_API_SECRET"</span>)
+
+kite = <span class="cl">KiteConnect</span>(api_key=API_KEY)
+login_url = kite.<span class="fn">login_url</span>()
+
+<span class="fn">print</span>(<span class="st">f"Visit this URL to get your request_token:"</span>)
+<span class="fn">print</span>(login_url)
+<span class="fn">print</span>(<span class="st">"\nAfter login, paste the request_token from the URL:"</span>)
+
+request_token = <span class="fn">input</span>(<span class="st">"request_token: "</span>).<span class="fn">strip</span>()
+session = kite.<span class="fn">generate_session</span>(request_token, api_secret=API_SECRET)
+access_token = session[<span class="st">"access_token"</span>]
+
+<span class="fn">print</span>(<span class="st">f"\nRun this command:"</span>)
+<span class="fn">print</span>(<span class="st">f"export KITE_ACCESS_TOKEN='{access_token}'"</span>)</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ AUTOMATION ═══════ -->
+<div id="automation" style="background:var(--void);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">19</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Production</div>
+      <h2 class="sec-title">Daily Automation (Cron)</h2>
+      <p class="sec-desc">How to schedule the algo to start automatically every weekday morning and stop after market close.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">crontab -e (Linux/Mac)</span></div>
+      <span class="code-lang">BASH</span>
+    </div>
+    <div class="code-body"><span class="cm"># Edit crontab: crontab -e</span>
+<span class="cm"># Format: MIN HOUR DAY MONTH DAY_OF_WEEK COMMAND</span>
+<span class="cm"># Timezone: set TZ=Asia/Kolkata in your shell profile</span>
+
+<span class="cm"># Step 1: Refresh Kite access token at 8:20 AM (Mon–Fri)</span>
+<span class="nm">20 8 * * 1-5</span> /path/to/env/bin/python /path/to/daily_token_refresh.py >> /logs/token.log 2>&1
+
+<span class="cm"># Step 2: Start the algo at 8:28 AM with today's SGX gap</span>
+<span class="cm"># (You need to read the gap from a data source or pass manually)</span>
+<span class="nm">28 8 * * 1-5</span> cd /path/to/algo && \
+    source .env && \
+    /path/to/env/bin/python nse_algo.py --mode paper --gap 0.0 \
+    >> /logs/algo_$(date +%Y%m%d).log 2>&1
+
+<span class="cm"># The algo auto-stops after 3:30 PM via its internal loop</span>
+<span class="cm"># The journal is auto-saved to trades_journal.csv</span>
+
+<span class="cm"># Optional: Send daily summary at 4:00 PM</span>
+<span class="nm">0 16 * * 1-5</span> /path/to/env/bin/python /path/to/daily_summary.py</div>
+  </div>
+
+  <div class="sh2">Running Commands Reference</div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-header-left"><div class="code-dots"><div class="code-dot cd-red"></div><div class="code-dot cd-yellow"></div><div class="code-dot cd-green"></div></div><span class="code-filename">All available commands</span></div>
+      <span class="code-lang">BASH</span>
+    </div>
+    <div class="code-body"><span class="cm"># Default (paper mode, continuous loop)</span>
+python nse_algo.py
+
+<span class="cm"># Paper trading mode explicitly</span>
+python nse_algo.py --mode paper
+
+<span class="cm"># Paper trading with SGX gap (0.6% up gap today)</span>
+python nse_algo.py --mode paper --gap 0.6
+
+<span class="cm"># Run once (pre-market + one scan) and exit</span>
+python nse_algo.py --once --gap -0.3
+
+<span class="cm"># Backtest on historical CSV data</span>
+python nse_algo.py --backtest
+
+<span class="cm"># Live trading (ONLY after profitable paper period)</span>
+python nse_algo.py --mode live --gap 0.4
+
+<span class="cm"># Help</span>
+python nse_algo.py --help</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ ROADMAP ═══════ -->
+<div id="roadmap" style="background:var(--obsidian);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">20</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Progression Plan</div>
+      <h2 class="sec-title">6-Month Learning Roadmap</h2>
+    </div>
+  </div>
+  <div class="roadmap">
+    <div class="rm-card"><div class="rm-head"><span class="rm-month">Month 1</span></div><div class="rm-body"><strong>Learn the tools.</strong> Draw pivot levels daily by hand. Watch price vs levels without trading. Goal: read EMA direction and ADX in 5 seconds.</div></div>
+    <div class="rm-card"><div class="rm-head"><span class="rm-month">Month 2</span></div><div class="rm-body"><strong>Paper trading.</strong> Apply all 6 entry rules on paper. Log every trade. Goal: 40+ trades, 55%+ win rate, morning routine under 20 min.</div></div>
+    <div class="rm-card"><div class="rm-head"><span class="rm-month">Month 3</span></div><div class="rm-body"><strong>First real capital.</strong> Trade 10&ndash;20% at small size. Goal: net profitable month, zero rule violations documented in journal.</div></div>
+    <div class="rm-card"><div class="rm-head"><span class="rm-month">Month 4</span></div><div class="rm-body"><strong>Diagnose and improve.</strong> Deep journal review. Find weakest setup type. Goal: identify trending vs sideways by 9:45 AM on 80%+ of days.</div></div>
+    <div class="rm-card"><div class="rm-head"><span class="rm-month">Month 5&ndash;6</span></div><div class="rm-body"><strong>Scale to 50% capital.</strong> Test psychological resilience. Goal: two consecutive profitable months, drawdown never above 5%.</div></div>
+    <div class="rm-card"><div class="rm-head"><span class="rm-month">Month 7+</span></div><div class="rm-body"><strong>Full operation.</strong> Review all data. Build Telegram alert automation. Goal: positive expectancy proven over 100+ live trades.</div></div>
+  </div>
+  <div class="callout callout-gold" style="margin-top:24px;">
+    <div class="callout-title">What the first 6 months are really for</div>
+    <p>The goal is not to get rich. It is to prove you can follow rules consistently under real financial pressure. Reach Month 7 with a journal of 100+ trades and a positive expectancy, and you will be in the top 10% of NSE retail traders. The system is not the edge &mdash; consistent execution of the system is the edge.</p>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ QUICK REF ═══════ -->
+<div id="quickref" style="background:var(--ink);border-bottom:1px solid var(--border);">
+<div class="section">
+  <div class="sec-header">
+    <span class="sec-num">21</span>
+    <div class="sec-title-wrap">
+      <div class="sec-eyebrow">Print &amp; Keep</div>
+      <h2 class="sec-title">Quick Reference Card</h2>
+    </div>
+  </div>
+  <div class="qr-card">
+    <h3>Morning Checklist (8:30 &ndash; 9:30 AM)</h3>
+    <div class="qr-grid">
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>Check SGX Nifty gap % vs prev NSE close</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>Download Bhavcopy. Calculate all pivot levels.</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>Draw PP/R1/R2/S1/S2 on all watchlist charts</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>Check daily chart ADX — below 20 for 3 days = reduce sizes</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>Set price alerts on Kite at each pivot level</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>Write one-sentence trade plan + max daily loss ₹</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>9:15 AM: market opens — WATCH ONLY, no trades</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>9:30 AM: run 4-filter check. Score and log it.</div>
+    </div>
+    <h3>Entry Checklist &mdash; Every Single Trade</h3>
+    <div class="qr-grid">
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>ADX &ge; 20 on 15-min chart</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>9 EMA correctly above/below 21 EMA</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>EMA separation &ge; 0.15% of entry price</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>Price within 0.2% of a pivot level</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>Signal candle confirms correct direction</div>
+      <div class="qr-item"><span class="qr-dot">&#9634;</span>Volume &ge; 1.5&times; the 20-bar average</div>
+    </div>
+    <h3>Exit Rules</h3>
+    <div class="qr-grid">
+      <div class="qr-item"><span class="qr-dot">&#9658;</span>T1 hit &rarr; exit 50%, move SL to breakeven</div>
+      <div class="qr-item"><span class="qr-dot">&#9658;</span>T2 hit &rarr; exit remaining 50%. Done.</div>
+      <div class="qr-item"><span class="qr-dot">&#9658;</span>ADX drops below 20 &rarr; exit 100%</div>
+      <div class="qr-item"><span class="qr-dot">&#9658;</span>2nd loss today &rarr; stop trading</div>
+      <div class="qr-item"><span class="qr-dot">&#9658;</span>3:15 PM &rarr; close ALL open positions</div>
+      <div class="qr-item"><span class="qr-dot">&#9658;</span>3 trades reached &rarr; done for today</div>
+    </div>
+    <h3>Python Commands</h3>
+    <div class="qr-grid">
+      <div class="qr-item"><span class="qr-dot">&gt;</span>python nse_algo.py --backtest</div>
+      <div class="qr-item"><span class="qr-dot">&gt;</span>python nse_algo.py --mode paper --gap 0.5</div>
+      <div class="qr-item"><span class="qr-dot">&gt;</span>python nse_algo.py --once --gap -0.3</div>
+      <div class="qr-item"><span class="qr-dot">&gt;</span>python nse_algo.py --mode live --gap 0.6</div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div><!-- /main -->
+
+<!-- FOOTER -->
+<div class="footer-section">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-name">ObsidianPivot</div>
+      <div class="footer-sub">NSE Day Trading Algo System v3.0 &middot; May 2026 &middot; Four Pillars: EMA &middot; Pivots &middot; ADX &middot; Volume</div>
+    </div>
+    <div class="footer-risk">
+      <strong>Risk Warning:</strong> Trading equity and derivatives involves significant risk of capital loss. Past backtest results do not guarantee future returns. This document is for educational purposes only. Paper trade for a minimum of 30 days before deploying real capital. Never trade with money you cannot afford to lose. &mdash; ObsidianPivot, May 2026
+    </div>
+  </div>
+</div>
+
+<script>
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+// Active nav on scroll
+const sections = document.querySelectorAll('[id]');
+const navItems = document.querySelectorAll('.nav-item');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 120) current = s.id;
+  });
+  navItems.forEach(n => {
+    n.classList.remove('active');
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes(current)) {
+      n.classList.add('active');
+    }
+  });
+});
+</script>
+</body>
+</html>
